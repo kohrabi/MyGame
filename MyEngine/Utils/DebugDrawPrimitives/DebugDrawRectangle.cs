@@ -31,7 +31,7 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
                 null,
                 _color,
                 0f,
-                Vector2.One / 0.5f,
+                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
                 new Vector2(_size.X, _outlineThickness),
                 SpriteEffects.None,
                 0f
@@ -42,7 +42,7 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
                 null,
                 _color,
                 0f,
-                Vector2.One / 0.5f,
+                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
                 new Vector2(_size.X, _outlineThickness),
                 SpriteEffects.None,
                 0f
@@ -53,7 +53,7 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
                 null,
                 _color,
                 0f,
-                Vector2.One / 0.5f,
+                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
                 new Vector2(_outlineThickness, _size.Y),
                 SpriteEffects.None,
                 0f
@@ -64,7 +64,7 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
                 null,
                 _color,
                 0f,
-                Vector2.One / 0.5f,
+                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
                 new Vector2(_outlineThickness, _size.Y),
                 SpriteEffects.None,
                 0f
@@ -78,7 +78,7 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
                 null,
                 _color,
                 0f,
-                Vector2.One / 0.5f,
+                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
                 _size,
                 SpriteEffects.None,
                 0f

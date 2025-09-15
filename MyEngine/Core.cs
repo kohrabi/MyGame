@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+using ImGuiNET;
+using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MyEngine.Components;
+using MyEngine.GameObjects;
 using MyEngine.Utils;
 
 namespace MyEngine
@@ -38,8 +39,11 @@ namespace MyEngine
         /// </summary>
         public static new ContentManager Content { get; private set; }
         
+        public static Camera MainCamera { get; set; }
+        
         // Resources for drawing.
         private GraphicsDeviceManager graphicsDeviceManager;
+        private ImGuiRenderer _imGuiRenderer;
 
         /// <summary>
         /// Initializes a new instance of the game. Configures platform-specific settings, 
@@ -64,6 +68,8 @@ namespace MyEngine
             Graphics.PreferredBackBufferWidth = width;
             Graphics.PreferredBackBufferHeight = height;
             Graphics.IsFullScreen = fullScreen;
+            Window.AllowUserResizing = true;
+            TargetElapsedTime = TimeSpan.FromSeconds(1d / 120d); // 120 FPS
             
             // Share GraphicsDeviceManager as a service.
             Services.AddService(typeof(GraphicsDeviceManager), Graphics);
@@ -91,15 +97,24 @@ namespace MyEngine
         /// </summary>
         protected override void Initialize()
         {
-            base.Initialize();
-            
             // Set the core's graphics device to a reference of the base Game's
             // graphics device.
             GraphicsDevice = base.GraphicsDevice;
 
             // Create the sprite batch instance.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
+            
+            
+            _imGuiRenderer = new ImGuiRenderer(this);
+            _imGuiRenderer.RebuildFontAtlas();
 
+            GameObject gameObject = new GameObject("Hello");
+            MainCamera = gameObject.AddComponent<Camera>();
+            
+            // Before LoadContent
+            base.Initialize();
+            
+            // After LoadContent
         }
 
         /// <summary>
@@ -110,6 +125,7 @@ namespace MyEngine
             base.LoadContent();
             
             DebugDraw.Instance.LoadContent(GraphicsDevice, Content);
+            
         }
 
         protected override void UnloadContent()
@@ -117,6 +133,7 @@ namespace MyEngine
             
         }
 
+        private float time = 0;
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -128,9 +145,63 @@ namespace MyEngine
         /// <param name="gameTime"></param>
         protected override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
+            // base.Draw(gameTime);
             
             DebugDraw.Instance.Draw(SpriteBatch);
+            
+            
+            // Call BeforeLayout first to set things up
+            _imGuiRenderer.BeforeLayout(gameTime);
+
+            // Draw our UI
+            ImGuiLayout();
+
+            // Call AfterLayout now to finish up and draw all the things
+            _imGuiRenderer.AfterLayout();
+            
+        }
+        
+        
+        private float f = 0.0f;
+
+        private bool show_test_window = false;
+        private bool show_another_window = false;
+        private System.Numerics.Vector3 clear_color = new System.Numerics.Vector3(114f / 255f, 144f / 255f, 154f / 255f);
+        private byte[] _textBuffer = new byte[100];
+
+        protected virtual void ImGuiLayout()
+        {
+            // 1. Show a simple window
+            // Tip: if we don't call ImGui.Begin()/ImGui.End() the widgets appears in a window automatically called "Debug"
+            {
+                ImGui.Text("Hello, world!");
+                ImGui.SliderFloat("float", ref f, 0.0f, 1.0f, string.Empty);
+                ImGui.ColorEdit3("clear color", ref clear_color);
+                if (ImGui.Button("Test Window")) show_test_window = !show_test_window;
+                if (ImGui.Button("Another Window")) show_another_window = !show_another_window;
+                ImGui.Text(string.Format("Application average {0:F3} ms/frame ({1:F1} FPS)", 1000f / ImGui.GetIO().Framerate, ImGui.GetIO().Framerate));
+
+                ImGui.InputText("Text input", _textBuffer, 100);
+
+                ImGui.Text("Texture sample");
+                // ImGui.Image(_imGuiTexture, new Num.Vector2(300, 150), Num.Vector2.Zero, Num.Vector2.One, Num.Vector4.One, Num.Vector4.One); // Here, the previously loaded texture is used
+            }
+
+            // 2. Show another simple window, this time using an explicit Begin/End pair
+            if (show_another_window)
+            {
+                ImGui.SetNextWindowSize(new System.Numerics.Vector2(200, 100), ImGuiCond.FirstUseEver);
+                ImGui.Begin("Another Window", ref show_another_window);
+                ImGui.Text("Hello");
+                ImGui.End();
+            }
+
+            // 3. Show the ImGui test window. Most of the sample code is in ImGui.ShowTestWindow()
+            if (show_test_window)
+            {
+                ImGui.SetNextWindowPos(new System.Numerics.Vector2(650, 20), ImGuiCond.FirstUseEver);
+                ImGui.ShowDemoWindow(ref show_test_window);
+            }
         }
     }
 }

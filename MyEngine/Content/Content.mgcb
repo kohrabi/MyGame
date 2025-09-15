@@ -13,14 +13,14 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Fonts/Hud.spritefont
+#begin Engine/Fonts/HUD.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Fonts/DebugFont.spritefont;Fonts/DebugFont.spritefont
+/build:Engine/Fonts/DebugFont.spritefont
 
-#begin whiteCircle.png
+#begin Engine/whiteCircle.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -30,9 +30,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:whiteCircle.png
+/build:Engine/whiteCircle.png
 
-#begin whiteCircleOutlined.png
+#begin Engine/whiteCircleOutlined.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -42,5 +42,5 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:whiteCircleOutlined.png
+/build:Engine/whiteCircleOutlined.png
 

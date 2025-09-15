@@ -7,18 +7,35 @@ using MyEngine.Interfaces;
 
 namespace MyEngine.Components;
 
+#nullable enable
 public abstract class Component : IUpdateable, IMyDrawable
 {
     private int _updateOrder;
     private int _drawOrder;
     private bool _enabled = true;
     private bool _visible = true;
+    private bool _active = true;
+    private bool _activeSelf = true;
     
     public GameObject GameObject { get; internal set; }
-    public Transform transform { get; internal set; }
+    public Transform Transform { get; internal set; }
 
-    public void Draw(GameTime gameTime) {}
+    public bool Active
+    {
+        get => _active;
+        set => _active = value;
+    }
 
+    public bool ActiveSelf
+    {
+        get => _activeSelf;
+        set
+        {
+            _activeSelf = value;
+            Active = value;
+        }
+    }
+    
     public int DrawOrder
     {
         get => _drawOrder; 

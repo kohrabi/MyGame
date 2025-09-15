@@ -23,14 +23,20 @@ public class DebugDraw
         _whiteRectangle = new Texture2D(graphicsDevice, 1, 1);
         _whiteRectangle.SetData(new[] { Color.White });
         
-        _whiteCircle = content.Load<Texture2D>("whiteCircle");
-        _whiteCircleOutlined = content.Load<Texture2D>("whiteCircleOutlined");
-        _font = content.Load<SpriteFont>("Fonts/");
+        _whiteCircle = content.Load<Texture2D>("Engine/whiteCircle");
+        _whiteCircleOutlined = content.Load<Texture2D>("Engine/whiteCircleOutlined");
+        _font = content.Load<SpriteFont>("Engine/Fonts/DebugFont");
     }
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Begin();
+        spriteBatch.Begin(
+            sortMode: SpriteSortMode.Deferred,
+            blendState: BlendState.AlphaBlend,
+            depthStencilState: DepthStencilState.None,
+            rasterizerState: RasterizerState.CullNone,
+            samplerState: SamplerState.PointWrap
+        );
         foreach (var command in _drawCommands)
         {
             command.Draw(spriteBatch);

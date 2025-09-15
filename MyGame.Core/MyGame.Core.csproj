@@ -12,6 +12,19 @@
       <Folder Include="Content\Sprites\" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\ImGuiRenderer\ImGuiRenderer.csproj" />
       <ProjectReference Include="..\MyEngine\MyEngine.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="Content\bin\**" />
+      <Compile Remove="Content\obj\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Remove="Content\bin\**" />
+      <EmbeddedResource Remove="Content\obj\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Content\bin\**" />
+      <None Remove="Content\obj\**" />
     </ItemGroup>
 </Project>

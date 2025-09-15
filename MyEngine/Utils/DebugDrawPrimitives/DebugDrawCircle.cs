@@ -20,14 +20,15 @@ public class DebugDrawCircle : IDebugDrawPrimitive
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        
         spriteBatch.Draw(
             DebugDraw._whiteCircle,
             _position,
             null,
             _color,
             0f,
-            Vector2.One / 0.5f,
-            _radius,
+            new Vector2(DebugDraw._whiteCircle.Width, DebugDraw._whiteCircle.Height) / 2f,
+            _radius / DebugDraw._whiteCircle.Width,
             SpriteEffects.None,
             0f
         );

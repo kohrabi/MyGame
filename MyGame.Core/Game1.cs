@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MyEngine.Utils;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace MyGame.Core
@@ -43,46 +44,46 @@ namespace MyGame.Core
             LocalizationManager.SetCulture(selectedLanguage);
         }
 
-        /// <summary>
-        /// Loads game content, such as textures and particle systems.
-        /// </summary>
+        private Texture2D test;
         protected override void LoadContent()
         {
             base.LoadContent();
             
-            Texture2D test = Content.Load<Texture2D>("Sprites/splash");
+            test = Content.Load<Texture2D>("Sprites/splash");
         }
 
-        /// <summary>
-        /// Updates the game's logic, called once per frame.
-        /// </summary>
-        /// <param name="gameTime">
-        /// Provides a snapshot of timing values used for game updates.
-        /// </param>
         protected override void Update(GameTime gameTime)
         {
             // Exit the game if the Back button (GamePad) or Escape key (Keyboard) is pressed.
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            
+            DebugDraw.DrawCircle(Vector2.Zero, Color.White, 256.0f);
+            DebugDraw.DrawString("This is a debug draw", 
+                new Vector2(GraphicsDevice.Viewport.Width / 2.0f, GraphicsDevice.Viewport.Height / 2.0f), 
+                Color.Red,
+                Vector2.One * 2.0f);
+
+            (float sin, float cos) = MathF.SinCos(MathHelper.ToRadians((float)(gameTime.TotalGameTime.TotalSeconds * 20.0f)));
+            Console.WriteLine(sin);
+            MainCamera.Transform.Position = new Vector2(sin, 0.0F) * 200.0f;
 
             // TODO: Add your update logic here
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// Draws the game's graphics, called once per frame.
-        /// </summary>
-        /// <param name="gameTime">
-        /// Provides a snapshot of timing values used for rendering.
-        /// </param>
         protected override void Draw(GameTime gameTime)
         {
-            // Clears the screen with the MonoGame orange color before drawing.
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            SpriteBatch.Begin(transformMatrix: MainCamera.Transform.WorldMatrix);
             
+            SpriteBatch.Draw(test, Vector2.Zero, Color.White);
+            SpriteBatch.Draw(test, new Vector2(-300.0f, 300.0f), Color.White);
+            
+            SpriteBatch.End();
 
             base.Draw(gameTime);
         }

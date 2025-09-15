@@ -15,7 +15,7 @@ internal class Program
         Application.SetHighDpiMode(HighDpiMode.SystemAware);
 
         // Create an instance of the game and start the game loop.
-        using var game = new Core();
+        using var game = new Game1();
         game.Run();
     }
 }

@@ -21,13 +21,14 @@ public class DebugDrawString : IDebugDrawPrimitive
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        Vector2 textSize = DebugDraw._font.MeasureString(_text);
         spriteBatch.DrawString(
             DebugDraw._font,
             _text,
             _position,
             _color,
             0f,
-            Vector2.One / 0.5f,
+            textSize / 2.0f,
             _size,
             SpriteEffects.None,
             0f

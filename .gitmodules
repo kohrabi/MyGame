@@ -1,0 +1,3 @@
+[submodule "Dependencies/ImGui.NET"]
+	path = Dependencies/ImGui.NET
+	url = https://github.com/kohrabi/ImGui.NET.git
