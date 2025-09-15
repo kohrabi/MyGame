@@ -22,7 +22,7 @@ namespace MyEngine
         /// <summary>
         /// Gets the graphics device manager to control the presentation of graphics.
         /// </summary>
-        public static GraphicsDeviceManager Graphics { get; private set; }
+        public static new GraphicsDeviceManager Graphics { get; private set; }
 
         /// <summary>
         /// Gets the graphics device used to create graphical resources and perform primitive rendering.
@@ -38,8 +38,6 @@ namespace MyEngine
         /// Gets the content manager used to load global assets.
         /// </summary>
         public static new ContentManager Content { get; private set; }
-        
-        public static Camera MainCamera { get; set; }
         
         // Resources for drawing.
         private GraphicsDeviceManager graphicsDeviceManager;
@@ -107,11 +105,9 @@ namespace MyEngine
             
             _imGuiRenderer = new ImGuiRenderer(this);
             _imGuiRenderer.RebuildFontAtlas();
-
-            GameObject gameObject = new GameObject("Hello");
-            MainCamera = gameObject.AddComponent<Camera>();
             
             // Before LoadContent
+            
             base.Initialize();
             
             // After LoadContent
@@ -147,8 +143,9 @@ namespace MyEngine
         {
             // base.Draw(gameTime);
             
-            DebugDraw.Instance.Draw(SpriteBatch);
+            SpriteBatch.GraphicsDevice.SetRenderTarget(null);
             
+            DebugDraw.Instance.Draw(SpriteBatch);
             
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
@@ -158,7 +155,6 @@ namespace MyEngine
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
-            
         }
         
         

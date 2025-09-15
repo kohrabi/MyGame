@@ -16,7 +16,7 @@ public class Transform
     private Vector2 _position;
     private float _rotation;
     private Vector2 _scale;
-    private Transform _parent;
+    private Transform? _parent;
     private Matrix _localMatrix;
 
 
@@ -97,50 +97,42 @@ public class Transform
 
     
     // TODO: Implement GlobalRotation properly
-    // public float GlobalRotation
-    // {
-    //     get
-    //     {
-    //         if (Parent != null)
-    //         {
-    //             return Rotation + Parent.GlobalRotation;
-    //         }
-    //         else
-    //         {
-    //             return Rotation;
-    //         }
-    //     }
-    //     set
-    //     {
-    //         if (Parent != null)
-    //         {
-    //             Rotation = value - Parent.GlobalRotation;
-    //         }
-    //         else
-    //         {
-    //             Rotation = value;
-    //         }
-    //     }
-    // }
+    public float GlobalRotation
+    {
+        get
+        {
+            if (Parent != null)
+            {
+                return Rotation + Parent.GlobalRotation;
+            }
+            else
+            {
+                return Rotation;
+            }
+        }
+        set
+        {
+            if (Parent != null)
+            {
+                Rotation = value - Parent.GlobalRotation;
+            }
+            else
+            {
+                Rotation = value;
+            }
+        }
+    }
 
     // TODO: Implement GlobalScale properly
-    // public Vector2 GlobalScale
-    // {
-    //     get
-    //     {
-    //         if (WorldMatrix.Decompose(out Vector3 scale, out _, out _))
-    //             return scale.ToVector2();
-    //         return Vector2.One;
-    //     }
-    //     set
-    //     {
-    //         if (Parent != null)
-    //         {
-    //             
-    //         }
-    //         return Scale
-    //     }
-    // }
+    public Vector2 GlobalScale
+    {
+        get
+        {
+            if (WorldMatrix.Decompose(out Vector3 scale, out _, out _))
+                return scale.ToVector2();
+            return Vector2.One;
+        }
+    }
     
     public Matrix LocalMatrix
     {
@@ -155,6 +147,7 @@ public class Transform
 
     public Transform(GameObject gameObject)
     {
+        _gameObject = gameObject;
         Position = Vector2.Zero;
         Rotation = 0f;
         Scale = Vector2.One;

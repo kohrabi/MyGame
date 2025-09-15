@@ -67,7 +67,14 @@ public abstract class Component : IUpdateable, IMyDrawable
     public event EventHandler<EventArgs> UpdateOrderChanged;
 
     public void Initialize() {}
-    public abstract void Update(GameTime gameTime);
-    public abstract void Draw(SpriteBatch spriteBatch, GameTime gameTime);
+
+    public virtual void Update(GameTime gameTime)
+    {
+        
+    }
+
+    public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    {
+    }
 
 }

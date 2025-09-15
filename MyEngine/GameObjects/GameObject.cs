@@ -7,7 +7,9 @@ using MyEngine.Components;
 namespace MyEngine.GameObjects;
 
 #nullable enable
-public class GameObject
+
+// Use Composition not Inheritance. Thank you!
+public sealed class GameObject
 {
     private bool _active = true;
     private bool _activeSelf = true;
@@ -45,7 +47,7 @@ public class GameObject
         }
     }
     
-    public GameObject(string name)
+    public GameObject(string name = "GameObject")
     {
         Name = name;
         Transform = new Transform(this);
