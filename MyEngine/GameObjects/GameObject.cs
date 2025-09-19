@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 
@@ -68,6 +69,22 @@ public sealed class GameObject
     public T? GetComponent<T>() where T : Component
     {
         return _components.Find(c => c is T) as T;
+    }
+
+    public void Initialize()
+    {
+        foreach (var component in _components)
+        {
+            component.Initialize();
+        }
+    }
+    
+    public void LoadContent(ContentManager content)
+    {
+        foreach (var component in _components)
+        {
+            component.LoadContent(content);
+        }
     }
     
     public void UpdateComponents(GameTime gameTime)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MyEngine.Components;
@@ -28,8 +29,17 @@ public class Sprite : Component
         get => _origin;
         set => _origin = value;
     }
-    
-    
+
+
+    public override void Initialize()
+    {
+        
+    }
+
+    public override void LoadContent(ContentManager content)
+    {
+    }
+
     public override void Update(GameTime gameTime) { }
 
     public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

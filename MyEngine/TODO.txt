@@ -1,9 +1,9 @@
 ﻿[X] Add Camera Component
 [X] Add Basic Sprite Component
-[ ] Add Scene
-[ ] Improve Sprite Component
-[ ] Add Render Target
-[ ] Add Docking to IMGUI
+[X] Add Basic Scene
+[ ] Add Scene Manager
+[X] Add Render Target
+[X] Add Docking to IMGUI
 [ ] Add Input System
 [ ] Add Physics Engine
 [ ] Add Audio System
@@ -11,3 +11,4 @@
 [ ] Add Particle System
 
 [ ] Add UI System
+[ ] Improve Sprite Component

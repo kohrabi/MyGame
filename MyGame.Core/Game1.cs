@@ -68,9 +68,10 @@ namespace MyGame.Core
 
         protected override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
             scene1.Draw(gameTime);
             
-            base.Draw(gameTime);
         }
+        
     }
 }

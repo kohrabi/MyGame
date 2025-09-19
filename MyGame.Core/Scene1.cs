@@ -30,9 +30,6 @@ public class Scene1 : Scene
     /// </summary>
     public override void Initialize()
     {
-        GameObject gameObject = new GameObject("Hello");
-        MainCamera = gameObject.AddComponent<Camera>();
-        
         // Load supported languages and set the default language.
         List<CultureInfo> cultures = LocalizationManager.GetSupportedCultures();
         var languages = new List<CultureInfo>();
@@ -40,12 +37,16 @@ public class Scene1 : Scene
         {
             languages.Add(cultures[i]);
         }
-
+        
         // TODO You should load this from a settings file or similar,
         // based on what the user or operating system selected.
         var selectedLanguage = LocalizationManager.DEFAULT_CULTURE_CODE;
         LocalizationManager.SetCulture(selectedLanguage);
         
+        GameObject gameObject = new GameObject("Hello");
+        MainCamera = gameObject.AddComponent<Camera>();
+        MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+  
         a = new GameObject();
         a.Transform.Position = new Vector2(100.0f, 100.0f);
         a.Transform.Scale = Vector2.One * 0.2f;
@@ -58,7 +59,6 @@ public class Scene1 : Scene
         var bsprite = b.AddComponent<Sprite>();
         bsprite.Texture = test;
         
-        MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
     }
 
     public override void LoadContent()

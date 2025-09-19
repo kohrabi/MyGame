@@ -65,6 +65,11 @@ namespace ImGuiNET.Renderer
             SetupInput();
         }
 
+        ~ImGuiRenderer()
+        {
+            ImGui.DestroyContext();
+        }
+
         #region ImGuiRenderer
 
         /// <summary>

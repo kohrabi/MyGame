@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MyEngine.Components;
@@ -28,7 +29,8 @@ public class Camera : Component
 
     public void Begin(SpriteBatch spriteBatch)
     {
-        spriteBatch.GraphicsDevice.SetRenderTarget(RenderTarget2D);
+        if (RenderTarget2D != null)
+            spriteBatch.GraphicsDevice.SetRenderTarget(RenderTarget2D);
         spriteBatch.Begin(
             sortMode: SpriteSortMode.FrontToBack,
             BlendState.AlphaBlend,
@@ -44,8 +46,17 @@ public class Camera : Component
     {
         spriteBatch.End();
     }
+
+
+    public override void Initialize()
+    {
         
-    
+    }
+
+    public override void LoadContent(ContentManager content)
+    {
+    }
+
     public override void Update(GameTime gameTime) { }
 
     public override void Draw(SpriteBatch spriteBatch, GameTime gameTime) {}

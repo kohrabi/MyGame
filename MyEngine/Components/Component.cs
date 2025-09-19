@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.GameObjects;
@@ -65,9 +66,14 @@ public abstract class Component : IUpdateable, IMyDrawable
 
     public event EventHandler<EventArgs> EnabledChanged;
     public event EventHandler<EventArgs> UpdateOrderChanged;
+    
+    // Callback order
+    // Constructor -> Initialize -> Load Content
+    // Unload content will be handled by content Manager / Scene
+    public abstract void Initialize();
 
-    public void Initialize() {}
-
+    public abstract void LoadContent(ContentManager content);
+    
     public virtual void Update(GameTime gameTime)
     {
         
