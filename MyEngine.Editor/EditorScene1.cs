@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.GameObjects;
+using MyEngine.IMGUIComponents;
+using MyEngine.Managers;
 using MyEngine.Utils;
 using Num =  System.Numerics;
 
@@ -18,45 +20,35 @@ public class EditorScene1 : Scene
     private GameObject b;
     private Texture2D test;
 
-    private ImGuiRenderer imGuiRenderer;
     private RenderTarget2D renderTarget;
-    
-    readonly Vector2 DEFAULT_RENDER_TARGET_SIZE = new Vector2(1280, 720);
-    readonly Vector2 PADDING = new Vector2(-20, -30);
-    private nint renderTargetPointer;
-    private Texture2D renderTargetTexture;
-    Color[] renderTargetData;
-    private bool resizeWindow = false;
-    private Vector2 windowSize;
     private bool show_test_window = false;
+    private ImGuiManager imGuiManager;
     
     public EditorScene1()
     {
     }
 
-    /// <summary>
-    /// Initializes the game, including setting up localization and adding the 
-    /// initial screens to the ScreenManager.
-    /// </summary>
     public override void Initialize()
     {
-        
         // ImGui Setup
-        imGuiRenderer = new ImGuiRenderer(Core.Instance);
-        imGuiRenderer.RebuildFontAtlas();
+        imGuiManager = new ImGuiManager();
+        
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         
-        MainCamera = Instantiate().AddComponent<Camera>();
-        // MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
         
-        // ImGui.LoadIniSettingsFromDisk("imgui.ini");
-        CreateRenderTarget(DEFAULT_RENDER_TARGET_SIZE);
         
         // Before Load Content
         base.Initialize();
         // After Load Content
+        
+        MainCamera = Instantiate().AddComponent<Camera>();
+        imGuiManager.AddComponent<ImGuiViewportRender>(this);
+        imGuiManager.AddDrawCommand(ImGuiLayout);
+        // MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+        
+        // ImGui.LoadIniSettingsFromDisk("imgui.ini");
         
         a = Instantiate();
         a.Transform.Position = new Vector2(0.0f, 0.0f);
@@ -69,10 +61,9 @@ public class EditorScene1 : Scene
         b.AddComponent<Sprite>().Texture = test;
     }
 
-    public override void LoadContent()
+    protected override void LoadContent()
     {
         test = Content.Load<Texture2D>("Sprites/test");
-        
     }
 
     public override void Update(GameTime gameTime)
@@ -80,26 +71,15 @@ public class EditorScene1 : Scene
         base.Update(gameTime);
         a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
         b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
-
-        if (resizeWindow)
-        {
-            resizeWindow = false;
-            CreateRenderTarget(windowSize);
-        }
+        
+        imGuiManager.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
-        GraphicsDevice.SetRenderTarget(null);
         
-        imGuiRenderer.BeforeLayout(gameTime);
-        
-        ImGuiLayout();
-        
-        // Call AfterLayout now to finish up and draw all the things
-        imGuiRenderer.AfterLayout();
-        
+        imGuiManager.Draw(gameTime);
     }
 
     private string _inputBuffer = "";
@@ -118,43 +98,5 @@ public class EditorScene1 : Scene
         ImGui.DockSpaceOverViewport(ImGui.GetMainViewport().ID);
         ImGui.ShowDemoWindow(ref show_test_window);
 
-        ImGui.Begin("GameWindow");
-        
-        // Get Render data
-        renderTarget.GetData(renderTargetData);
-        renderTargetTexture.SetData(renderTargetData);
-        
-        // Set center
-        Num.Vector2 size = new Num.Vector2(renderTarget.Width, renderTarget.Height);
-        Num.Vector2 avail = ImGui.GetContentRegionAvail();
-        ImGui.SetCursorPos(ImGui.GetCursorPos() + (avail - size) / 2.0f);
-        
-        // Render
-        ImGui.Image(renderTargetPointer, size);
-        
-        // If it is resized, queue and recreate 
-        windowSize = avail;
-        if (!windowSize.Equals(new Num.Vector2(renderTarget.Width, renderTarget.Height)))
-            resizeWindow = true;
-        
-        ImGui.End();
-        
-    }
-
-    private void CreateRenderTarget(Vector2 size)
-    {
-        if (renderTarget != null)
-            renderTarget.Dispose();
-        renderTarget = new RenderTarget2D(GraphicsDevice, (int)size.X, (int)size.Y);
-        
-        renderTargetData = new Color[renderTarget.Width * renderTarget.Height];
-        if (renderTargetTexture != null)
-            renderTargetTexture.Dispose();
-        renderTargetTexture = new Texture2D(GraphicsDevice, renderTarget.Width, renderTarget.Height);
-        
-        if (renderTargetPointer != 0)
-            imGuiRenderer.UnbindTexture(renderTargetPointer);
-        renderTargetPointer = imGuiRenderer.BindTexture(renderTargetTexture);
-        MainCamera.RenderTarget2D = renderTarget;
     }
 }

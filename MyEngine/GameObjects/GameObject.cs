@@ -79,20 +79,12 @@ public sealed class GameObject
         return _components.Find(c => c is T) as T;
     }
 
-    public void Initialize()
+    public void Initialize(ContentManager content)
     {
         _isInitialized = true;
         foreach (var component in _components)
         {
-            component.Initialize();
-        }
-    }
-    
-    public void LoadContent(ContentManager content)
-    {
-        foreach (var component in _components)
-        {
-            component.LoadContent(content);
+            component.Initialize(content);
         }
     }
     

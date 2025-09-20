@@ -31,13 +31,9 @@ public class Sprite : Component
     }
 
 
-    public override void Initialize()
+    public override void Initialize(ContentManager content)
     {
-        
-    }
-
-    public override void LoadContent(ContentManager content)
-    {
+        base.Initialize(content);
     }
 
     public override void Update(GameTime gameTime) { }

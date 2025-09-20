@@ -69,9 +69,12 @@ public abstract class Component : IUpdateable, IMyDrawable
     // Callback order
     // Constructor -> Initialize -> Load Content
     // Unload content will be handled by content Manager / Scene
-    public abstract void Initialize();
+    public virtual void Initialize(ContentManager content)
+    {
+        LoadContent(content);
+    }
 
-    public abstract void LoadContent(ContentManager content);
+    protected virtual void LoadContent(ContentManager content) {}
     
     public virtual void Update(GameTime gameTime)
     {

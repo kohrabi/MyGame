@@ -172,6 +172,7 @@ namespace MyEngine
             SpriteBatch.GraphicsDevice.SetRenderTarget(null);
             
             DebugDraw.Instance.Draw(SpriteBatch);
+
             //
             // // Call BeforeLayout first to set things up
             // _imGuiRenderer.BeforeLayout(gameTime);
@@ -194,6 +195,7 @@ namespace MyEngine
         public static void UnregisterManager(GlobalManager manager)
         {
             Instance._managers.Remove(manager);
+            manager.Enabled = false;
         }
 
         public static T GetGlobalManager<T>() where T : GlobalManager

@@ -44,7 +44,7 @@ public class Scene1 : Scene
         //
     }
 
-    public override void LoadContent()
+    protected override void LoadContent()
     {
         test = Content.Load<Texture2D>("Sprites/test");
         

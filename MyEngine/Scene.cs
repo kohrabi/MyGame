@@ -54,7 +54,7 @@ public abstract class Scene : IDisposable
         LoadContent();
     }
 
-    public abstract void LoadContent();
+    protected abstract void LoadContent();
 
     public virtual void UnloadContent()
     {
@@ -65,8 +65,7 @@ public abstract class Scene : IDisposable
     {
         foreach (var gameObject in uninitGameObjects)
         {
-            gameObject.Initialize();
-            gameObject.LoadContent(content);
+            gameObject.Initialize(content);
             gameObjects.Add(gameObject);
         }
         uninitGameObjects.Clear();
@@ -101,7 +100,7 @@ public abstract class Scene : IDisposable
             MainCamera.End(SpriteBatch);
         else
             SpriteBatch.End();
-
+        GraphicsDevice.SetRenderTarget(null);
     }
 
     // This function is deffered (Wait until the next update)
