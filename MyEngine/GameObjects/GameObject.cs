@@ -17,27 +17,28 @@ public sealed class GameObject
     private bool _isInitialized = false;
     private List<Component> _components = new List<Component>();
     private Scene _scene;
+    
+    public bool IsInitialized => _isInitialized;
     public string Name { get; set; }
     public Transform Transform { get; set; }
     public Scene Scene => _scene;
-
+    public List<Component> Components => _components; 
+    
     // Set Active Recursively
     // This might be bad
-    public bool IsInitialized => _isInitialized;
     public bool Active
     {
         get => _active;
         set
         {
             _active = value;
-            for (int i = 0; i < _components.Count; i++)
-            {
-                _components[i].Enabled = value;
+            foreach (Component component in _components) {
+                component.Enabled = value;
             }
 
-            for (int i = 0; i < Transform.ChildCount; i++)
+            foreach (Transform child in Transform.Children)
             {
-                Transform.GameObject.Active = value;
+                child.GameObject.Active = value;
             }
         }
     }

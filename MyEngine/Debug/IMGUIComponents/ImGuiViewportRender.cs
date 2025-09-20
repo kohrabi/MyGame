@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Num =  System.Numerics;
 
-namespace MyEngine.IMGUIComponents;
+namespace MyEngine.Debug.IMGUIComponents;
 
 public class ImGuiViewportRender : ImGuiComponent
 {
@@ -38,26 +38,28 @@ public class ImGuiViewportRender : ImGuiComponent
     
     public override void Draw()
     {
-        
-        ImGui.Begin("GameWindow");
-        
-        // Get Render data
-        _renderTarget.GetData(_renderTargetData);
-        _renderTargetTexture.SetData(_renderTargetData);
-        
-        // Set center
-        Num.Vector2 size = new Num.Vector2(_renderTarget.Width, _renderTarget.Height);
-        Num.Vector2 avail = ImGui.GetContentRegionAvail();
-        ImGui.SetCursorPos(ImGui.GetCursorPos() + (avail - size) / 2.0f);
-        
-        // Render
-        ImGui.Image(_renderTargetPointer, size);
-        
-        // If it is resized, queue and recreate 
-        _windowSize = avail;
-        if (!_windowSize.Equals(new Num.Vector2(_renderTarget.Width, _renderTarget.Height)))
-            _resizeWindow = true;
-        
+
+        if (ImGui.Begin("GameWindow"))
+        {
+
+            // Get Render data
+            _renderTarget.GetData(_renderTargetData);
+            _renderTargetTexture.SetData(_renderTargetData);
+            
+            // Set center
+            Num.Vector2 size = new Num.Vector2(_renderTarget.Width, _renderTarget.Height);
+            Num.Vector2 avail = ImGui.GetContentRegionAvail();
+            ImGui.SetCursorPos(ImGui.GetCursorPos() + (avail - size) / 2.0f);
+            
+            // Render
+            ImGui.Image(_renderTargetPointer, size);
+            
+            // If it is resized, queue and recreate 
+            _windowSize = avail;
+            if (!_windowSize.Equals(new Num.Vector2(_renderTarget.Width, _renderTarget.Height)))
+                _resizeWindow = true;
+            
+        }
         ImGui.End();
     }
     

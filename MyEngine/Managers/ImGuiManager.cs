@@ -4,7 +4,7 @@ using System.Linq;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Components;
-using MyEngine.IMGUIComponents;
+using MyEngine.Debug.IMGUIComponents;
 
 namespace MyEngine.Managers;
 

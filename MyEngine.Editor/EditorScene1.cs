@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.GameObjects;
-using MyEngine.IMGUIComponents;
+using MyEngine.Debug.IMGUIComponents;
 using MyEngine.Managers;
 using MyEngine.Utils;
 using Num =  System.Numerics;
@@ -31,21 +31,22 @@ public class EditorScene1 : Scene
     public override void Initialize()
     {
         // ImGui Setup
+        MainCamera = Instantiate("MainCamera").AddComponent<Camera>();
+        MainCamera.GameObject.AddComponent<CameraController>();
+        
         imGuiManager = new ImGuiManager();
         
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
-        
-        
+        imGuiManager.AddComponent<ImGuiViewportRender>(this);
+        imGuiManager.AddDrawCommand(ImGuiLayout);
+        imGuiManager.AddComponent<ImGuiGameObjectsWindow>(this);
         
         // Before Load Content
         base.Initialize();
         // After Load Content
         
-        MainCamera = Instantiate().AddComponent<Camera>();
-        imGuiManager.AddComponent<ImGuiViewportRender>(this);
-        imGuiManager.AddDrawCommand(ImGuiLayout);
         // MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
         
         // ImGui.LoadIniSettingsFromDisk("imgui.ini");
@@ -92,9 +93,9 @@ public class EditorScene1 : Scene
             {
                 ImGui.EndMenu();
             }
-            
             ImGui.EndMainMenuBar();
         }
+        
         ImGui.DockSpaceOverViewport(ImGui.GetMainViewport().ID);
         ImGui.ShowDemoWindow(ref show_test_window);
 

@@ -1,7 +1,7 @@
 ﻿using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace MyEngine.IMGUIComponents;
+namespace MyEngine.Debug.IMGUIComponents;
 
 public abstract class ImGuiComponent
 {

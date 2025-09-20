@@ -27,7 +27,7 @@ public abstract class Scene : IDisposable
     
     protected ContentManager Content { get; }
    
-    protected List<GameObject> GameObjects => gameObjects;
+    public List<GameObject> GameObjects => gameObjects;
     // Core stuff
     protected GraphicsDeviceManager Graphics => Core.Graphics;
     protected GraphicsDevice GraphicsDevice => Core.GraphicsDevice;
@@ -104,7 +104,7 @@ public abstract class Scene : IDisposable
     }
 
     // This function is deffered (Wait until the next update)
-    public GameObject Instantiate(string gameObjectName = "")
+    public GameObject Instantiate(string gameObjectName = "GameObject")
     {
         GameObject gameObject = new GameObject(this, gameObjectName);
         AddGameObject(gameObject);

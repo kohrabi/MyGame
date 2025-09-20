@@ -19,11 +19,7 @@ public class Transform
     private Transform? _parent;
     private Matrix _localMatrix;
 
-
-    public int ChildCount
-    {
-        get => _children.Count;
-    }
+    public List<Transform> Children => _children;
     public GameObject GameObject
     {
         get => _gameObject;

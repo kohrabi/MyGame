@@ -76,13 +76,8 @@ public abstract class Component : IUpdateable, IMyDrawable
 
     protected virtual void LoadContent(ContentManager content) {}
     
-    public virtual void Update(GameTime gameTime)
-    {
-        
-    }
+    public virtual void Update(GameTime gameTime) { }
 
-    public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-    {
-    }
+    public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime) { }
 
 }

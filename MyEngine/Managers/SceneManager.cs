@@ -35,7 +35,7 @@ public class SceneManager : GlobalManager
     public void LoadScene(Scene nextScene) {
         if (_currentScene != null && nextScene == _currentScene)
             return;
-        Debug.Assert(nextScene != null, "Cannot change scene to null.");
+        System.Diagnostics.Debug.Assert(nextScene != null, "Cannot change scene to null.");
         _nextScene = nextScene;
         _changeScene = true;
     }
