@@ -14,6 +14,7 @@ public abstract class Scene : IDisposable
 {
     private ContentManager content;
     private List<GameObject> gameObjects;
+    private List<GameObject> uninitGameObjects;
     private Camera _mainCamera;
     
     public Camera MainCamera
@@ -22,19 +23,20 @@ public abstract class Scene : IDisposable
         set => _mainCamera = value;
     }
 
+    public Color BackgroundColor = Color.CornflowerBlue;
+    
     protected ContentManager Content { get; }
    
-    public List<GameObject> GameObjects => gameObjects;
+    protected List<GameObject> GameObjects => gameObjects;
     // Core stuff
-    public GraphicsDeviceManager Graphics => Core.Graphics;
-    public GraphicsDevice GraphicsDevice => Core.GraphicsDevice;
-    public SpriteBatch SpriteBatch => Core.SpriteBatch;
-    
-    
+    protected GraphicsDeviceManager Graphics => Core.Graphics;
+    protected GraphicsDevice GraphicsDevice => Core.GraphicsDevice;
+    protected SpriteBatch SpriteBatch => Core.SpriteBatch;
 
     public Scene()
     {
-        
+        gameObjects = new List<GameObject>();
+        uninitGameObjects = new List<GameObject>();
         // Create a content manager for the scene
         Content = new ContentManager(Core.Content.ServiceProvider);
 
@@ -45,21 +47,14 @@ public abstract class Scene : IDisposable
 
     ~Scene() => Dispose(false);
 
+    // Callback order
+    // Constructor => Initialize => LoadContent
     public virtual void Initialize()
     {
-        foreach (var component in GameObjects)
-        {
-            component.Initialize();
-        }
+        LoadContent();
     }
 
-    public virtual void LoadContent()
-    {
-        foreach (var gameObject in GameObjects)
-        {
-            gameObject.LoadContent(content);
-        }
-    }
+    public abstract void LoadContent();
 
     public virtual void UnloadContent()
     {
@@ -68,6 +63,14 @@ public abstract class Scene : IDisposable
 
     public virtual void Update(GameTime gameTime)
     {
+        foreach (var gameObject in uninitGameObjects)
+        {
+            gameObject.Initialize();
+            gameObject.LoadContent(content);
+            gameObjects.Add(gameObject);
+        }
+        uninitGameObjects.Clear();
+        
         foreach (var gameObject in GameObjects)
         {
             gameObject.UpdateComponents(gameTime);
@@ -76,10 +79,49 @@ public abstract class Scene : IDisposable
 
     public virtual void Draw(GameTime gameTime)
     {
+        if (MainCamera != null)
+            MainCamera.Begin(SpriteBatch);
+        else
+            SpriteBatch.Begin(
+                sortMode: SpriteSortMode.FrontToBack,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                DepthStencilState.Default,
+                RasterizerState.CullNone,
+                null
+                );
+        GraphicsDevice.Clear(BackgroundColor);
         foreach (var gameObject in GameObjects)
         {
             gameObject.DrawComponents(SpriteBatch, gameTime);
         }
+        
+        
+        if (MainCamera != null)
+            MainCamera.End(SpriteBatch);
+        else
+            SpriteBatch.End();
+
+    }
+
+    // This function is deffered (Wait until the next update)
+    public GameObject Instantiate(string gameObjectName = "")
+    {
+        GameObject gameObject = new GameObject(this, gameObjectName);
+        AddGameObject(gameObject);
+        return gameObject;
+    }
+    
+    // This function is deffered (Wait until the next update)
+    public void AddGameObject(GameObject gameObject)
+    {
+        uninitGameObjects.Add(gameObject);
+    }
+
+    // This function is deffered (Wait until the next update)
+    public void RemoveGameObject(GameObject gameObject)
+    {
+        uninitGameObjects.Remove(gameObject);
     }
     
     /// <summary>
@@ -110,6 +152,7 @@ public abstract class Scene : IDisposable
         {
             return;
         }
+        
 
         if (disposing)
         {

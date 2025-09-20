@@ -18,7 +18,10 @@ public class SceneManager : GlobalManager
     
     public override void OnEnable() {}
 
-    public override void OnDisable() {}
+    public override void OnDisable()
+    {
+        Console.WriteLine("Please don't disable Scene Manager");
+    }
 
     public override void Update(GameTime gameTime)
     {
@@ -29,12 +32,24 @@ public class SceneManager : GlobalManager
         }
     }
     
-    public void ChangeScene(Scene nextScene) {
-        if (nextScene == _currentScene)
+    public void LoadScene(Scene nextScene) {
+        if (_currentScene != null && nextScene == _currentScene)
             return;
         Debug.Assert(nextScene != null, "Cannot change scene to null.");
         _nextScene = nextScene;
         _changeScene = true;
+    }
+
+    public void UpdateScene(GameTime gameTime)
+    {
+        if (_currentScene != null)
+            _currentScene.Update(gameTime);
+    }
+
+    public void DrawScene(GameTime gameTime)
+    {
+        if (_currentScene != null)
+            _currentScene.Draw(gameTime);
     }
     
     private void TransitionScene()
@@ -47,6 +62,5 @@ public class SceneManager : GlobalManager
         _nextScene = null;
         
         _currentScene.Initialize();
-        _currentScene.LoadContent();
     }
 }

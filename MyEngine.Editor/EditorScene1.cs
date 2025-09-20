@@ -28,6 +28,7 @@ public class EditorScene1 : Scene
     Color[] renderTargetData;
     private bool resizeWindow = false;
     private Vector2 windowSize;
+    private bool show_test_window = false;
     
     public EditorScene1()
     {
@@ -47,38 +48,36 @@ public class EditorScene1 : Scene
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         
-        GameObject gameObject = new GameObject("Hello");
-        MainCamera = gameObject.AddComponent<Camera>();
+        MainCamera = Instantiate().AddComponent<Camera>();
         // MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
-  
-        a = new GameObject();
-        a.Transform.Position = new Vector2(0.0f, 0.0f);
-        a.Transform.Scale = Vector2.One;
-        Sprite asprite = a.AddComponent<Sprite>();
-        asprite.Texture = test;
-        
-        b = new GameObject();
-        b.Transform.Position = new Vector2(-100.0f, 300.0f);
-        a.Transform.AddChild(b.Transform);
-        var bsprite = b.AddComponent<Sprite>();
-        bsprite.Texture = test;
         
         // ImGui.LoadIniSettingsFromDisk("imgui.ini");
         CreateRenderTarget(DEFAULT_RENDER_TARGET_SIZE);
+        
+        // Before Load Content
+        base.Initialize();
+        // After Load Content
+        
+        a = Instantiate();
+        a.Transform.Position = new Vector2(0.0f, 0.0f);
+        a.Transform.Scale = Vector2.One;
+        a.AddComponent<Sprite>().Texture = test;
+        
+        b = Instantiate();
+        b.Transform.Position = new Vector2(-100.0f, 300.0f);
+        a.Transform.AddChild(b.Transform);
+        b.AddComponent<Sprite>().Texture = test;
     }
 
     public override void LoadContent()
     {
         test = Content.Load<Texture2D>("Sprites/test");
+        
     }
 
-    public override void UnloadContent()
-    {
-    }
-
-    private bool show_test_window = false;
     public override void Update(GameTime gameTime)
     {
+        base.Update(gameTime);
         a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
         b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
 
@@ -91,21 +90,8 @@ public class EditorScene1 : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.SetRenderTarget(renderTarget);
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            MainCamera.Begin(SpriteBatch);
-
-            // SpriteBatch.Begin();
-            a.DrawComponents(SpriteBatch, gameTime);
-            b.DrawComponents(SpriteBatch, gameTime);
-            // SpriteBatch.End();
-            
-            MainCamera.End(SpriteBatch);
-        }
+        base.Draw(gameTime);
         GraphicsDevice.SetRenderTarget(null);
-
-        
         
         imGuiRenderer.BeforeLayout(gameTime);
         
@@ -169,5 +155,6 @@ public class EditorScene1 : Scene
         if (renderTargetPointer != 0)
             imGuiRenderer.UnbindTexture(renderTargetPointer);
         renderTargetPointer = imGuiRenderer.BindTexture(renderTargetTexture);
+        MainCamera.RenderTarget2D = renderTarget;
     }
 }

@@ -30,40 +30,39 @@ public class Scene1 : Scene
     /// </summary>
     public override void Initialize()
     {
-        // Load supported languages and set the default language.
-        List<CultureInfo> cultures = LocalizationManager.GetSupportedCultures();
-        var languages = new List<CultureInfo>();
-        for (int i = 0; i < cultures.Count; i++)
-        {
-            languages.Add(cultures[i]);
-        }
-        
-        // TODO You should load this from a settings file or similar,
-        // based on what the user or operating system selected.
-        var selectedLanguage = LocalizationManager.DEFAULT_CULTURE_CODE;
-        LocalizationManager.SetCulture(selectedLanguage);
-        
-        GameObject gameObject = new GameObject("Hello");
-        MainCamera = gameObject.AddComponent<Camera>();
-        MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
-  
-        a = new GameObject();
-        a.Transform.Position = new Vector2(100.0f, 100.0f);
-        a.Transform.Scale = Vector2.One * 0.2f;
-        Sprite asprite = a.AddComponent<Sprite>();
-        asprite.Texture = test;
-        
-        b = new GameObject();
-        b.Transform.Position = new Vector2(-100.0f, 300.0f);
-        a.Transform.AddChild(b.Transform);
-        var bsprite = b.AddComponent<Sprite>();
-        bsprite.Texture = test;
-        
+        // // Load supported languages and set the default language.
+        // List<CultureInfo> cultures = LocalizationManager.GetSupportedCultures();
+        // var languages = new List<CultureInfo>();
+        // for (int i = 0; i < cultures.Count; i++)
+        // {
+        //     languages.Add(cultures[i]);
+        // }
+        // // TODO You should load this from a settings file or similar,
+        // // based on what the user or operating system selected.
+        // var selectedLanguage = LocalizationManager.DEFAULT_CULTURE_CODE;
+        // LocalizationManager.SetCulture(selectedLanguage);
+        //
     }
 
     public override void LoadContent()
     {
         test = Content.Load<Texture2D>("Sprites/test");
+        
+        
+        MainCamera = Instantiate().AddComponent<Camera>();
+        MainCamera.Transform.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+  
+        a = Instantiate();
+        a.Transform.Position = new Vector2(100.0f, 100.0f);
+        a.Transform.Scale = Vector2.One * 0.2f;
+        Sprite asprite = a.AddComponent<Sprite>();
+        asprite.Texture = test;
+        
+        b = Instantiate();
+        b.Transform.Position = new Vector2(-100.0f, 300.0f);
+        a.Transform.AddChild(b.Transform);
+        var bsprite = b.AddComponent<Sprite>();
+        bsprite.Texture = test;
     }
 
     public override void UnloadContent()
@@ -73,6 +72,8 @@ public class Scene1 : Scene
 
     public override void Update(GameTime gameTime)
     {
+        base.Update(gameTime);
+        
         DebugDraw.DrawCircle(Vector2.Zero, Color.White, 256.0f);
         DebugDraw.DrawString("This is a debug draw", 
             new Vector2(GraphicsDevice.Viewport.Width / 2.0f, GraphicsDevice.Viewport.Height / 2.0f), 
@@ -91,14 +92,6 @@ public class Scene1 : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
-
-        MainCamera.Begin(SpriteBatch);
-        
-        a.DrawComponents(SpriteBatch, gameTime);
-        b.DrawComponents(SpriteBatch, gameTime);
-        
-        MainCamera.End(SpriteBatch);
-
+        base.Draw(gameTime);
     }
 }

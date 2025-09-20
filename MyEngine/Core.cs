@@ -5,6 +5,7 @@ using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MyEngine.Components;
 using MyEngine.GameObjects;
 using MyEngine.Managers;
@@ -47,6 +48,8 @@ namespace MyEngine
         /// Gets the content manager used to load global assets.
         /// </summary>
         public new static ContentManager Content { get; private set; }
+        
+        public static SceneManager SceneManager { get; private set; }
         
         // public static RenderTarget2D RenderTarget { get; private set; } 
         
@@ -99,6 +102,11 @@ namespace MyEngine
 
             // Mouse is visible by default.
             IsMouseVisible = true;
+            
+            // Init Managers
+            
+            SceneManager = new SceneManager();
+            RegisterManager(SceneManager);
         }
 
         /// <summary>
@@ -127,9 +135,8 @@ namespace MyEngine
         protected override void LoadContent()
         {
             base.LoadContent();
-            
+
             DebugDraw.Instance.LoadContent(GraphicsDevice, Content);
-            
         }
 
         protected override void UnloadContent()
@@ -141,9 +148,15 @@ namespace MyEngine
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+            // Exit the game if the Back button (GamePad) or Escape key (Keyboard) is pressed.
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+                || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
             
             foreach (var manager in _managers)
                 manager.Update(gameTime);
+            
+            SceneManager.UpdateScene(gameTime);
         }
 
         /// <summary>
@@ -152,11 +165,13 @@ namespace MyEngine
         /// <param name="gameTime"></param>
         protected override void Draw(GameTime gameTime)
         {
-            // base.Draw(gameTime);
-            //
-            // SpriteBatch.GraphicsDevice.SetRenderTarget(null);
-            //
-            // DebugDraw.Instance.Draw(SpriteBatch);
+            base.Draw(gameTime);
+            
+            SceneManager.DrawScene(gameTime);
+            
+            SpriteBatch.GraphicsDevice.SetRenderTarget(null);
+            
+            DebugDraw.Instance.Draw(SpriteBatch);
             //
             // // Call BeforeLayout first to set things up
             // _imGuiRenderer.BeforeLayout(gameTime);

@@ -2,13 +2,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using MyEngine.Components;
 using MyEngine.GameObjects;
 using MyEngine.Interfaces;
 
+#nullable enable
 namespace MyEngine.Components;
 
-#nullable enable
 public abstract class Component : IUpdateable, IMyDrawable
 {
     private int _updateOrder;

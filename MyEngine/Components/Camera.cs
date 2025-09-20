@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
+
 namespace MyEngine.Components;
 
 public class Camera : Component
@@ -11,7 +12,7 @@ public class Camera : Component
     public RenderTarget2D RenderTarget2D
     {
         get => _renderTarget2D;
-        private set => _renderTarget2D = value;
+        set => _renderTarget2D = value;
     }
     
     public void SetRenderTarget(int width, int height)

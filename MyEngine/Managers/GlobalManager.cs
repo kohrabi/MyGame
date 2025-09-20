@@ -25,4 +25,6 @@ public abstract class GlobalManager
     public abstract void OnEnable();
     public abstract void OnDisable();
     public abstract void Update(GameTime gameTime);
+    
+    
 }
