@@ -7,9 +7,7 @@
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*">
             <PrivateAssets>All</PrivateAssets>
         </PackageReference>
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Content\Sprites\" />
+        <PackageReference Include="Nopipeline.Task" Version="2.3.0" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\ImGuiRenderer\ImGuiRenderer.csproj" />

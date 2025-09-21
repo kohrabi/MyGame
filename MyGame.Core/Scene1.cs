@@ -85,8 +85,8 @@ public class Scene1 : Scene
         // MainCamera.Transform.Position = new Vector2(sin, 0.0F) * 200.0f;
 
         // TODO: Add your update logic here
-        a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
-        b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
+        // a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
+        // b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
 
     }
 

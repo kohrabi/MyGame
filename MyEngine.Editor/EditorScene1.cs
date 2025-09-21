@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using ImGuiNET;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
@@ -35,6 +36,8 @@ public class EditorScene1 : Scene
         MainCamera.GameObject.AddComponent<CameraController>();
         
         imGuiManager = new ImGuiManager(this);
+        string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/EditorScene1.ini");
+        ImGui.LoadIniSettingsFromDisk(path);
         
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;

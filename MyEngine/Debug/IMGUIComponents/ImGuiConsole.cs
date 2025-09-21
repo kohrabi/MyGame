@@ -46,6 +46,7 @@ public class ImGuiConsole : ImGuiComponent
     
     public override void Draw()
     {
+        ImGui.SetNextWindowSizeConstraints(new Num.Vector2(50f), new Num.Vector2(1280, 1080));
         if (ImGui.Begin("Console"))
         {
             if (ImGui.SmallButton("Clear"))

@@ -35,7 +35,7 @@ public class ImGuiViewportRender : ImGuiComponent
     
     public override void Draw()
     {
-
+        ImGui.SetNextWindowSizeConstraints(new Num.Vector2(100f), new Num.Vector2(2560f, 1440f));
         if (ImGui.Begin("GameWindow"))
         {
 
@@ -63,6 +63,9 @@ public class ImGuiViewportRender : ImGuiComponent
     
     private void CreateRenderTarget(Vector2 size)
     {
+        if (size.X <= 20 || size.Y <= 20)
+            return;
+        
         if (_renderTarget != null)
             _renderTarget.Dispose();
         _renderTarget = new RenderTarget2D(Core.GraphicsDevice, (int)size.X, (int)size.Y);

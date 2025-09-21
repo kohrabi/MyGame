@@ -59,7 +59,10 @@ public sealed class GameObject
     {
         _scene = scene;
         Name = name;
-        Transform = AddComponent<Transform>();
+        Transform = new Transform();
+        Transform.GameObject = this;
+        Transform.Transform = Transform;
+        _components.Add(Transform);
     }
     
     public T AddComponent<T>() where T : Component

@@ -1,0 +1,34 @@
+{
+	"root": "./",
+	"references":
+	[
+
+	],
+	"content":
+	{
+		"sprites":
+		{
+			"path": "Sprites/*.png",
+			"recursive": "True",
+			"action": "build",
+			"importer": "TextureImporter",
+			"processor": "TextureProcessor",
+			"processorParam":
+			{
+				"ColorKeyColor": "255,0,255,255",
+				"ColorKeyEnabled": "True",
+				"GenerateMipmaps": "False",
+				"PremultiplyAlpha": "True",
+				"ResizeToPowerOfTwo": "False",
+				"MakeSquare": "False",
+				"TextureFormat": "Color"
+			}
+		},
+		"imguiIni":
+		{
+			"path": "ImGuiIni/*.ini",
+			"recursive": "True",
+			"action": "copy",
+		}
+	}
+}

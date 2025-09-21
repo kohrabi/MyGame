@@ -33,6 +33,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
 
     public override void Draw()
     {
+        ImGui.SetNextWindowSizeConstraints(new Num.Vector2(50f), new Num.Vector2(1280, 1080));
         if (ImGui.Begin("GameObjects"))
         {
             foreach (var gameObject in Scene.GameObjects)
@@ -43,6 +44,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         }
         ImGui.End();
 
+        ImGui.SetNextWindowSizeConstraints(new Num.Vector2(50f), new Num.Vector2(1280, 1080));
         if (ImGui.Begin("Components"))
         {
             if (_selectedGameObject != null)

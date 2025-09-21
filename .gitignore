@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+*.mgcb
 
 # User-specific files
 *.rsuser
