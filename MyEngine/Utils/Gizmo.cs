@@ -20,7 +20,9 @@ public class Gizmo : Component
     public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         base.Draw(spriteBatch, gameTime);
-        
+
+        if (Transform.Parent.GameObject.HasComponent<Camera>())
+            return;
         spriteBatch.Draw(
             _gizmoTexture, 
             Transform.GlobalPosition, 

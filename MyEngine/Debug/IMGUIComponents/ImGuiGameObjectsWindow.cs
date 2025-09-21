@@ -47,7 +47,6 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         {
             if (_selectedGameObject != null)
             {
-                DrawTreeNode(_selectedGameObject.Transform);
                 foreach (var component in _selectedGameObject.Components)
                 {
                     DrawTreeNode(component);
@@ -96,24 +95,6 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
             }
         }
     }
-    
-    private void DrawTreeNode(Transform transform)
-    {
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None;
-        if (ImGui.CollapsingHeader(transform.GetType().Name + "##" + transform.GetHashCode(), flags))
-        {
-            foreach (var member in transform.GetType().GetMembers())
-            {
-                if (member.GetCustomAttribute<SerializeField>() != null)
-                {
-                    if (member is FieldInfo fieldInfo)   
-                        FieldToImGui(fieldInfo, transform);
-                    else if (member is PropertyInfo propertyInfo)
-                        PropertyToImGui(propertyInfo, transform);
-                }
-            }
-        }
-    }
 
     private void PropertyToImGui(PropertyInfo property, object target)
     {
@@ -122,7 +103,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         if (property.PropertyType == typeof(bool))
         {
             bool valueRef = (bool)property.GetValue(target);
-            if (ImGui.Checkbox(propertyName, ref valueRef))
+            if (ImGui.Checkbox(propertyName + "##" + target.GetHashCode(), ref valueRef))
             {
                 property.SetValue(target, valueRef);
             }
@@ -130,7 +111,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (property.PropertyType == typeof(int))
         {
             int valueRef = (int)property.GetValue(target);
-            if (ImGui.DragInt(propertyName, ref valueRef))
+            if (ImGui.DragInt(propertyName + "##" + target.GetHashCode(), ref valueRef))
             {
                 property.SetValue(target, valueRef);
             }
@@ -138,7 +119,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (property.PropertyType == typeof(float))
         {
             float valueRef = (float)property.GetValue(target);
-            if (ImGui.DragFloat(propertyName, ref valueRef))
+            if (ImGui.DragFloat(propertyName + "##" + target.GetHashCode(), ref valueRef))
             {
                 property.SetValue(target, (float)valueRef);
             }
@@ -147,7 +128,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         {
             double value = (double)property.GetValue(target);
             float valueRef = (float)value;
-            if (ImGui.DragFloat(propertyName, ref valueRef))
+            if (ImGui.DragFloat(propertyName + "##" + target.GetHashCode(), ref valueRef))
             {
                 value = valueRef;
                 property.SetValue(target, value);
@@ -156,7 +137,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (property.PropertyType == typeof(Vector2))
         {
             Num.Vector2 valueRef = ((Vector2)property.GetValue(target)).ToNumerics();
-            if (ImGui.DragFloat2(propertyName, ref valueRef))
+            if (ImGui.DragFloat2(propertyName + "##" + target.GetHashCode(), ref valueRef))
             {
                 property.SetValue(target, valueRef.ToXna());
             }
@@ -164,7 +145,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (property.PropertyType == typeof(Vector3))
         {
             Num.Vector3 valueRef = ((Vector3)property.GetValue(target)).ToNumerics();
-            if (ImGui.DragFloat3(propertyName, ref valueRef))
+            if (ImGui.DragFloat3(propertyName + "##" + target.GetHashCode(), ref valueRef))
             {
                 property.SetValue(target, valueRef.ToXna());
             }
@@ -178,7 +159,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         if (field.FieldType == typeof(bool))
         {
             bool valueRef = (bool)field.GetValue(target);
-            if (ImGui.Checkbox(fieldName, ref valueRef))
+            if (ImGui.Checkbox(fieldName + "##" + target.GetHashCode(), ref valueRef))
             {
                 field.SetValue(target, valueRef);
             }
@@ -186,7 +167,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (field.FieldType == typeof(int))
         {
             int valueRef = (int)field.GetValue(target);
-            if (ImGui.DragInt(fieldName, ref valueRef))
+            if (ImGui.DragInt(fieldName + "##" + target.GetHashCode(), ref valueRef))
             {
                 field.SetValue(target, valueRef);
             }
@@ -194,7 +175,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (field.FieldType == typeof(float))
         {
             float valueRef = (float)field.GetValue(target);
-            if (ImGui.DragFloat(fieldName, ref valueRef))
+            if (ImGui.DragFloat(fieldName + "##" + target.GetHashCode(), ref valueRef))
             {
                 field.SetValue(target, (float)valueRef);
             }
@@ -203,7 +184,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         {
             double value = (double)field.GetValue(target);
             float valueRef = (float)value;
-            if (ImGui.DragFloat(fieldName, ref valueRef))
+            if (ImGui.DragFloat(fieldName + "##" + target.GetHashCode(), ref valueRef))
             {
                 value = valueRef;
                 field.SetValue(target, value);
@@ -212,7 +193,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (field.FieldType == typeof(Vector2))
         {
             Num.Vector2 valueRef = ((Vector2)field.GetValue(target)).ToNumerics();
-            if (ImGui.DragFloat2(fieldName, ref valueRef))
+            if (ImGui.DragFloat2(fieldName + "##" + target.GetHashCode(), ref valueRef))
             {
                 field.SetValue(target, valueRef.ToXna());
             }
@@ -220,7 +201,7 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
         else if (field.FieldType == typeof(Vector3))
         {
             Num.Vector3 valueRef = ((Vector3)field.GetValue(target)).ToNumerics();
-            if (ImGui.DragFloat3(fieldName, ref valueRef))
+            if (ImGui.DragFloat3(fieldName + "##" + target.GetHashCode(), ref valueRef))
             {
                 field.SetValue(target, valueRef.ToXna());
             }

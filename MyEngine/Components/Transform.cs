@@ -9,9 +9,8 @@ using MyEngine.Utils.Attributes;
 namespace MyEngine.Components;
 
 #nullable enable
-public class Transform
+public class Transform : Component
 {
-    private GameObject _gameObject;
     private List<Transform> _children = new();
     
     private Vector2 _position;
@@ -21,11 +20,6 @@ public class Transform
     private Matrix _localMatrix;
 
     public List<Transform> Children => _children;
-    public GameObject GameObject
-    {
-        get => _gameObject;
-        private set => _gameObject = value;
-    }
     
     // Local Position of the object
     [SerializeField]
@@ -145,9 +139,8 @@ public class Transform
         get => Parent != null ? LocalMatrix * Parent.WorldMatrix : LocalMatrix;
     }
 
-    public Transform(GameObject gameObject)
+    public Transform()
     {
-        _gameObject = gameObject;
         Position = Vector2.Zero;
         Rotation = 0f;
         Scale = Vector2.One;

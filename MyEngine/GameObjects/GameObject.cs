@@ -59,7 +59,7 @@ public sealed class GameObject
     {
         _scene = scene;
         Name = name;
-        Transform = new Transform(this);
+        Transform = AddComponent<Transform>();
     }
     
     public T AddComponent<T>() where T : Component
@@ -80,6 +80,11 @@ public sealed class GameObject
     public T? GetComponent<T>() where T : Component
     {
         return _components.Find(c => c is T) as T;
+    }
+    
+    public bool HasComponent<T>() where T : Component
+    {
+        return _components.Find(c => c is T) != null;
     }
 
     public void Initialize(ContentManager content)

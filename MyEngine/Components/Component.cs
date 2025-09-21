@@ -37,14 +37,14 @@ public abstract class Component : IMyUpdateable, IMyDrawable
         }
     }
     
-    [SerializeField]
+    // [SerializeField]
     public int DrawOrder
     {
         get => _drawOrder; 
         set { _drawOrder = value; DrawOrderChanged?.Invoke(this, EventArgs.Empty); }
     }
 
-    [SerializeField]
+    // [SerializeField]
     public int UpdateOrder
     {
         get => _updateOrder; 
