@@ -18,19 +18,9 @@ public interface IMyDrawable
     int DrawOrder { get; }
 
     /// <summary>
-    /// Indicates if <see cref="Draw" /> will be called.
-    /// </summary>
-    bool Visible { get; }
-
-    /// <summary>
     /// Raised when <see cref="DrawOrder" /> changed.
     /// </summary>
     event EventHandler<EventArgs> DrawOrderChanged;
-
-    /// <summary>
-    /// Raised when <see cref="Visible" /> changed.
-    /// </summary>
-    event EventHandler<EventArgs> VisibleChanged;
 
     /// <summary>
     /// Called when this <see cref="IMyDrawable" /> should draw itself.

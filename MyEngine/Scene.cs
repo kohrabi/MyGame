@@ -12,7 +12,7 @@ namespace MyEngine;
 
 public abstract class Scene : IDisposable
 {
-    private ContentManager content;
+    private ContentManager _content;
     private List<GameObject> gameObjects;
     private List<GameObject> uninitGameObjects;
     private Camera _mainCamera;
@@ -25,7 +25,7 @@ public abstract class Scene : IDisposable
 
     public Color BackgroundColor = Color.CornflowerBlue;
     
-    protected ContentManager Content { get; }
+    protected ContentManager Content =>  _content;
    
     public List<GameObject> GameObjects => gameObjects;
     // Core stuff
@@ -38,7 +38,7 @@ public abstract class Scene : IDisposable
         gameObjects = new List<GameObject>();
         uninitGameObjects = new List<GameObject>();
         // Create a content manager for the scene
-        Content = new ContentManager(Core.Content.ServiceProvider);
+        _content = new ContentManager(Core.Content.ServiceProvider);
 
         // Set the root directory for content to the same as the root directory
         // for the game's content.
@@ -65,7 +65,7 @@ public abstract class Scene : IDisposable
     {
         foreach (var gameObject in uninitGameObjects)
         {
-            gameObject.Initialize(content);
+            gameObject.Initialize(Content);
             gameObjects.Add(gameObject);
         }
         uninitGameObjects.Clear();
@@ -100,6 +100,9 @@ public abstract class Scene : IDisposable
             MainCamera.End(SpriteBatch);
         else
             SpriteBatch.End();
+        
+        DebugDraw.Instance.Draw(SpriteBatch, MainCamera?.Transform.WorldMatrix);
+        
         GraphicsDevice.SetRenderTarget(null);
     }
 

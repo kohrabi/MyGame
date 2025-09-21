@@ -20,4 +20,14 @@ public static class VectorExtensions
     {
         return new Num.Vector2(vector2.X, vector2.Y);
     }
+    
+    public static Vector2 ToXna(this Num.Vector2 vector2)
+    {
+        return new Vector2(vector2.X, vector2.Y);
+    }
+    
+    public static Vector3 ToXna(this Num.Vector3 vector3)
+    {
+        return new Vector3(vector3.X, vector3.Y, vector3.Z);
+    }
 }

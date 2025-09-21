@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MyEngine.Utils;
+using MyEngine.Utils.Attributes;
 
 namespace MyEngine.Components;
 
@@ -9,7 +11,9 @@ public class Sprite : Component
     private Texture2D _texture = null;
     private Rectangle? _sourceRectangle = null;
     private Vector2 _origin = Vector2.One / 2.0f;
-    
+
+    [SerializeField] 
+    public double blablabla = 1;
     public Texture2D Texture
     {
         get => _texture;
@@ -40,7 +44,7 @@ public class Sprite : Component
 
     public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        if (!Visible || Texture == null)
+        if (Texture == null)
             return;
         spriteBatch.Draw(
             Texture, 

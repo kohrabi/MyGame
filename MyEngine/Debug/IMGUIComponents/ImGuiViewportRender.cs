@@ -8,8 +8,6 @@ namespace MyEngine.Debug.IMGUIComponents;
 
 public class ImGuiViewportRender : ImGuiComponent
 {
-    private Scene _scene;
-    public Scene Scene => _scene;
     
     readonly Vector2 DEFAULT_RENDER_TARGET_SIZE = new Vector2(1280, 720);
     readonly Vector2 PADDING = new Vector2(-20, -30);
@@ -21,9 +19,8 @@ public class ImGuiViewportRender : ImGuiComponent
     private Vector2 _windowSize;
 
     public ImGuiViewportRender(ImGuiRenderer imGuiRenderer, Scene scene)
-        : base(imGuiRenderer)
+        : base(imGuiRenderer, scene)
     {
-        _scene = scene;
         CreateRenderTarget(DEFAULT_RENDER_TARGET_SIZE);
     }
 

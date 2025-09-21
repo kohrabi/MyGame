@@ -12,7 +12,7 @@ public class Editor : MyEngine.Core
     EditorScene1 scene1;
         
     public Editor()
-        : base("My Game Title", 800, 600, false)
+        : base("My Game Title", 1280, 720, false)
     {
     }
 

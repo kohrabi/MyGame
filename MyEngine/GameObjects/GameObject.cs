@@ -17,6 +17,8 @@ public sealed class GameObject
     private bool _isInitialized = false;
     private List<Component> _components = new List<Component>();
     private Scene _scene;
+
+    public bool IsDebugGameObject = false;
     
     public bool IsInitialized => _isInitialized;
     public string Name { get; set; }
@@ -33,7 +35,7 @@ public sealed class GameObject
         {
             _active = value;
             foreach (Component component in _components) {
-                component.Enabled = value;
+                component.Active = value;
             }
 
             foreach (Transform child in Transform.Children)
@@ -94,10 +96,8 @@ public sealed class GameObject
         if (!Active) return;
         foreach (var component in _components)
         {
-            if (component.Enabled)
-            {
+            if (component.Active)
                 component.Update(gameTime);
-            }
         }
     }
     
@@ -106,10 +106,8 @@ public sealed class GameObject
         if (!Active) return;
         foreach (var component in _components)
         {
-            if (component.Visible)
-            {
+            if (component.Active)
                 component.Draw(spriteBatch, gameTime);
-            }
         }
     }
 }

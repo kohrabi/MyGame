@@ -4,22 +4,23 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.GameObjects;
 using MyEngine.Interfaces;
+using MyEngine.Utils;
+using MyEngine.Utils.Attributes;
 
 #nullable enable
 namespace MyEngine.Components;
 
-public abstract class Component : IUpdateable, IMyDrawable
+public abstract class Component : IMyUpdateable, IMyDrawable
 {
     private int _updateOrder;
     private int _drawOrder;
-    private bool _enabled = true;
-    private bool _visible = true;
     private bool _active = true;
     private bool _activeSelf = true;
     
     public GameObject GameObject { get; internal set; }
     public Transform Transform { get; internal set; }
 
+    [SerializeField]
     public bool Active
     {
         get => _active;
@@ -36,24 +37,14 @@ public abstract class Component : IUpdateable, IMyDrawable
         }
     }
     
+    [SerializeField]
     public int DrawOrder
     {
         get => _drawOrder; 
         set { _drawOrder = value; DrawOrderChanged?.Invoke(this, EventArgs.Empty); }
     }
 
-    public bool Visible
-    {
-        get => _visible; 
-        set { _visible = value; VisibleChanged?.Invoke(this, EventArgs.Empty); }
-    }
-
-    public bool Enabled
-    {
-        get => _enabled; 
-        set { _enabled = value; EnabledChanged?.Invoke(this, EventArgs.Empty); }
-    }
-
+    [SerializeField]
     public int UpdateOrder
     {
         get => _updateOrder; 

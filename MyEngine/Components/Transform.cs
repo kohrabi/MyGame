@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.GameObjects;
 using MyEngine.Utils;
+using MyEngine.Utils.Attributes;
 
 namespace MyEngine.Components;
 
@@ -27,6 +28,7 @@ public class Transform
     }
     
     // Local Position of the object
+    [SerializeField]
     public Vector2 Position
     {
         get => _position;
@@ -38,6 +40,7 @@ public class Transform
     }
 
     // Local Rotation in radians
+    [SerializeField]
     public float Rotation
     {
         get => _rotation;
@@ -49,6 +52,7 @@ public class Transform
     }
 
     // Local Scale of the object
+    [SerializeField]
     public Vector2 Scale
     {
         get => _scale;

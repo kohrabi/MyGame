@@ -34,14 +34,15 @@ public class EditorScene1 : Scene
         MainCamera = Instantiate("MainCamera").AddComponent<Camera>();
         MainCamera.GameObject.AddComponent<CameraController>();
         
-        imGuiManager = new ImGuiManager();
+        imGuiManager = new ImGuiManager(this);
         
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
-        imGuiManager.AddComponent<ImGuiViewportRender>(this);
+        imGuiManager.AddComponent<ImGuiViewportRender>();
         imGuiManager.AddDrawCommand(ImGuiLayout);
-        imGuiManager.AddComponent<ImGuiGameObjectsWindow>(this);
+        var gameObjectWindow = imGuiManager.AddComponent<ImGuiGameObjectsWindow>();
+        imGuiManager.AddComponent<ImGuiConsole>();
         
         // Before Load Content
         base.Initialize();
@@ -60,6 +61,15 @@ public class EditorScene1 : Scene
         b.Transform.Position = new Vector2(-100.0f, 300.0f);
         a.Transform.AddChild(b.Transform);
         b.AddComponent<Sprite>().Texture = test;
+        
+        var gizmoObject = Instantiate();
+        gizmoObject.AddComponent<Gizmo>();
+        gizmoObject.Active = false;
+        gameObjectWindow.OnSelectedGameObjectChanged += (selectedGameObject) =>
+        {
+            gizmoObject.Active = selectedGameObject != null;
+            gizmoObject.Transform.Parent = selectedGameObject?.Transform;
+        };
     }
 
     protected override void LoadContent()
