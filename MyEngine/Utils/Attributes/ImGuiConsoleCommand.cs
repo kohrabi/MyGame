@@ -22,6 +22,7 @@ public class ImGuiConsoleCommand : Attribute
     public ImGuiConsoleCommand(string command, Type type, string methodName, string description = "")
     {
         _command = command.ToUpper();
+        // If this throw some wacky shit, it usually means you have two of the same function
         _method = type.GetMethod(methodName, flags);
         _description = description;
     }

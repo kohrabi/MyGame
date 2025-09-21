@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MyEngine.Managers;
 
 namespace MyEngine.Editor;
 
@@ -25,6 +26,6 @@ public class Editor : MyEngine.Core
         base.Initialize();
         
         scene1 = new EditorScene1();
-        SceneManager.LoadScene(scene1);
+        SceneManager.Instance.LoadScene(scene1);
     }
 }

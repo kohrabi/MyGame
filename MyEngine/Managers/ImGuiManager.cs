@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET.Renderer;
@@ -55,6 +56,12 @@ public class ImGuiManager
     
     public T AddComponent<T>(params object[] varargs) where T : ImGuiComponent
     {
+        T? returnComponent = (T?)_components.Find(c => c is T);
+        if (returnComponent != null)
+        {
+            Console.WriteLine("Component type " + typeof(T).FullName + " already exists in ImGuiManager. ");
+            return returnComponent;
+        }
         var args = new object[] { _imGuiRenderer, _scene }
             .Concat(varargs)
             .ToArray();

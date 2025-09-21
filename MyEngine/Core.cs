@@ -22,12 +22,7 @@ namespace MyEngine
     
     public class Core : Game
     {
-        internal static Core s_instance;
-        
-        /// <summary>
-        /// Gets a reference to the Core instance.
-        /// </summary>
-        public static Core Instance => s_instance;
+        public static Core Instance { get; private set; }
 
         /// <summary>
         /// Gets the graphics device manager to control the presentation of graphics.
@@ -49,8 +44,6 @@ namespace MyEngine
         /// </summary>
         public new static ContentManager Content { get; private set; }
         
-        public static SceneManager SceneManager { get; private set; }
-        
         // public static RenderTarget2D RenderTarget { get; private set; } 
         
         // Resources for drawing.
@@ -66,13 +59,10 @@ namespace MyEngine
         public Core(string title = "My Game Title", int width = 1280, int height = 720, bool fullScreen = false)
         {
             // Ensure that multiple cores are not created.
-            if (s_instance != null)
-            {
-                throw new InvalidOperationException($"Only a single Core instance can be created");
-            }
+            System.Diagnostics.Debug.Assert(Instance == null);
 
             // Store reference to engine for global member access.
-            s_instance = this;
+            Instance = this;
 
             // Create a new graphics device manager.
             Graphics = new GraphicsDeviceManager(this);
@@ -105,8 +95,8 @@ namespace MyEngine
             
             // Init Managers
             
-            SceneManager = new SceneManager();
-            RegisterManager(SceneManager);
+            RegisterManager(new SceneManager());
+            RegisterManager(new DebugLog());
         }
 
         /// <summary>
@@ -121,6 +111,7 @@ namespace MyEngine
 
             // Create the sprite batch instance.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
+            
             
             // Before LoadContent
             
@@ -156,7 +147,7 @@ namespace MyEngine
             foreach (var manager in _managers)
                 manager.Update(gameTime);
             
-            SceneManager.UpdateScene(gameTime);
+            SceneManager.Instance.UpdateScene(gameTime);
         }
 
         /// <summary>
@@ -167,7 +158,7 @@ namespace MyEngine
         {
             base.Draw(gameTime);
             
-            SceneManager.DrawScene(gameTime);
+            SceneManager.Instance.DrawScene(gameTime);
             
             SpriteBatch.GraphicsDevice.SetRenderTarget(null);
             

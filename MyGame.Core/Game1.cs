@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using MyEngine;
 using MyEngine.Components;
 using MyEngine.GameObjects;
+using MyEngine.Managers;
 using MyEngine.Utils;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -37,7 +38,7 @@ namespace MyGame.Core
             base.Initialize();
 
             scene1 = new Scene1();
-            SceneManager.LoadScene(scene1);
+            SceneManager.Instance.LoadScene(scene1);
         }
 
         

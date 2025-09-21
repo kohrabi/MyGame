@@ -6,6 +6,8 @@ namespace MyEngine.Managers;
 
 public class SceneManager : GlobalManager
 {
+    public static SceneManager Instance { get; private set; }
+    
     private Scene _currentScene;
     private Scene _nextScene;
     private bool _changeScene = false;
@@ -15,6 +17,12 @@ public class SceneManager : GlobalManager
     
     public delegate void SceneChangeEvent(Scene scene);
     public event SceneChangeEvent OnSceneChanged;
+
+    public SceneManager()
+    {
+        System.Diagnostics.Debug.Assert(CurrentScene == null);
+        Instance = this;
+    }
     
     public override void OnEnable() {}
 

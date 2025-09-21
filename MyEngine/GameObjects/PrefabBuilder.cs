@@ -1,4 +1,5 @@
 ﻿using MyEngine.Components;
+using MyEngine.Managers;
 
 namespace MyEngine.GameObjects;
 
@@ -22,6 +23,6 @@ public class PrefabBuilder
     
     public static PrefabBuilder Instatiate()
     {
-        return new PrefabBuilder(Core.SceneManager.CurrentScene.Instantiate());
+        return new PrefabBuilder(SceneManager.Instance.CurrentScene.Instantiate());
     }
 }
