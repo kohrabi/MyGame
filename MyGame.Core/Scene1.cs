@@ -7,7 +7,9 @@ using Microsoft.Xna.Framework.Input;
 using MyEngine;
 using MyEngine.Components;
 using MyEngine.GameObjects;
+using MyEngine.Managers;
 using MyEngine.Utils;
+using MyEngine.Utils.Tween;
 using MyGame.Core.Localization;
 
 namespace MyGame.Core;
@@ -74,6 +76,7 @@ public class Scene1 : Scene
     {
         base.Update(gameTime);
         
+        
         DebugDraw.DrawCircle(Vector2.Zero, Color.White, 256.0f);
         DebugDraw.DrawString("This is a debug draw", 
             new Vector2(GraphicsDevice.Viewport.Width / 2.0f, GraphicsDevice.Viewport.Height / 2.0f), 
@@ -85,6 +88,7 @@ public class Scene1 : Scene
         // MainCamera.Transform.Position = new Vector2(sin, 0.0F) * 200.0f;
 
         // TODO: Add your update logic here
+        
         // a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
         // b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
 

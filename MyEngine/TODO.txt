@@ -6,8 +6,9 @@
 [X] Add Docking to IMGUI
 [X] Add ImGuiConsole
 [X] Add ImGuiGameObjectsList
+[X] Add Coroutine system
 [ ] Add Tween Manager
-[ ] Add Coroutine system
+[ ] Refactor the entire GlobalManager System
 [ ] Add CollisionSystem
 [ ] Add Physics Engine
 [ ] Add Fixed Update

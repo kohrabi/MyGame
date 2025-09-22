@@ -26,67 +26,41 @@ public class DebugLog : GlobalManager
     
     public static void Info(string value)
     {
-        if (Instance == null || Instance.ImGuiConsole == null)
-        {
-            Console.WriteLine(value);
-            return;
-        }
-        else
-        {
-            Instance.ImGuiConsole.AddLog("[info] " + value);
-        }
+        value = "[info] " + value;
+        Console.WriteLine(value);
+        if (Instance != null && Instance.ImGuiConsole != null)
+            Instance.ImGuiConsole.AddLog(value);
     }
     
     public static void Warning(string value)
     {
-        if (Instance == null || Instance.ImGuiConsole == null)
-        {
-            Console.WriteLine(value);
-            return;
-        }
-        else
-        {
-            Instance.ImGuiConsole.AddLog("[warning] " + value);
-        }
+        value = "[warning] " + value;
+        Console.WriteLine(value);
+        if (Instance != null && Instance.ImGuiConsole != null)
+            Instance.ImGuiConsole.AddLog(value);
     }
     
     public static void Error(string value)
     {
-        if (Instance == null || Instance.ImGuiConsole == null)
-        {
-            Console.WriteLine(value);
-            return;
-        }
-        else
-        {
-            Instance.ImGuiConsole.AddLog("[error] " + value);
-        }
+        value = "[error] " + value;
+        Console.WriteLine(value);
+        if (Instance != null && Instance.ImGuiConsole != null)
+            Instance.ImGuiConsole.AddLog(value);
     }
     
     public static void Log(string value)
     {
-        if (Instance == null || Instance.ImGuiConsole == null)
-        {
-            Console.WriteLine(value);
-            return;
-        }
-        else
-        {
+        Console.WriteLine(value);
+        if (Instance != null && Instance.ImGuiConsole != null)
             Instance.ImGuiConsole.AddLog(value);
-        }
     }
     
     public static void Comment(string value)
     {
-        if (Instance == null || Instance.ImGuiConsole == null)
-        {
-            Console.WriteLine(value);
-            return;
-        }
-        else
-        {
-            Instance.ImGuiConsole.AddLog("# " + value);
-        }
+        value = "# " + value;
+        Console.WriteLine(value);
+        if (Instance != null && Instance.ImGuiConsole != null)
+            Instance.ImGuiConsole.AddLog(value);
     }
 
     public override void OnEnable() { }

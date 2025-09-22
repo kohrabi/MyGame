@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using ImGuiNET;
 using ImGuiNET.Renderer;
@@ -10,6 +11,7 @@ using MyEngine.Components;
 using MyEngine.GameObjects;
 using MyEngine.Managers;
 using MyEngine.Utils;
+using MyEngine.Utils.Coroutines;
 
 namespace MyEngine
 {
@@ -50,6 +52,7 @@ namespace MyEngine
         private GraphicsDeviceManager graphicsDeviceManager;
         
         private List<GlobalManager> _managers = new List<GlobalManager>();
+        private SceneManager _sceneManager;
 
         /// <summary>
         /// Initializes a new instance of the game. Configures platform-specific settings, 
@@ -95,29 +98,51 @@ namespace MyEngine
             
             // Init Managers
             
-            RegisterManager(new SceneManager());
+            _sceneManager = new SceneManager();
+            RegisterManager(_sceneManager);
             RegisterManager(new DebugLog());
+            RegisterManager(new CoroutineManager());
+            RegisterManager(new TweenManager());
+            GetGlobalManager<CoroutineManager>().StartCoroutine(test());
+        }
+
+        IEnumerator test()
+        {
+            yield return null;
+            Console.WriteLine("Hello");
+            yield return null;
+            Console.WriteLine("returned null");
+            yield return new WaitForSeconds(1f);
+            Console.WriteLine("Waited 1 seconds");
+            yield return new WaitFor(other());
+            Console.WriteLine("Waited For other");
+            yield break;
+            Console.WriteLine("Hi");
+        }
+
+        IEnumerator other()
+        {
+            yield return null;
+            Console.WriteLine("Other Coroutine");
+            yield return new WaitForSeconds(1f);
+            Console.WriteLine("Other Coroutine Ended");
         }
 
         /// <summary>
         /// Initializes the game, including setting up localization and adding the 
         /// initial screens to the ScreenManager.
+        /// Override function should put base at the top
         /// </summary>
         protected override void Initialize()
         {
             // Set the core's graphics device to a reference of the base Game's
             // graphics device.
             GraphicsDevice = base.GraphicsDevice;
-
+            
             // Create the sprite batch instance.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             
-            
-            // Before LoadContent
-            
             base.Initialize();
-            
-            // After LoadContent
         }
 
         /// <summary>
@@ -147,7 +172,7 @@ namespace MyEngine
             foreach (var manager in _managers)
                 manager.Update(gameTime);
             
-            SceneManager.Instance.UpdateScene(gameTime);
+            _sceneManager.UpdateScene(gameTime);
         }
 
         /// <summary>
@@ -158,7 +183,7 @@ namespace MyEngine
         {
             base.Draw(gameTime);
             
-            SceneManager.Instance.DrawScene(gameTime);
+            _sceneManager.DrawScene(gameTime);
             
             SpriteBatch.GraphicsDevice.SetRenderTarget(null);
             

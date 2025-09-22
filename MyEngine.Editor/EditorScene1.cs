@@ -11,6 +11,7 @@ using MyEngine.GameObjects;
 using MyEngine.Debug.IMGUIComponents;
 using MyEngine.Managers;
 using MyEngine.Utils;
+using MyEngine.Utils.Tween;
 using Num =  System.Numerics;
 
 namespace MyEngine.Editor;
@@ -55,14 +56,14 @@ public class EditorScene1 : Scene
         
         // ImGui.LoadIniSettingsFromDisk("imgui.ini");
         
-        a = Instantiate();
-        a.Transform.Position = new Vector2(0.0f, 0.0f);
-        a.Transform.Scale = Vector2.One;
-        a.AddComponent<Sprite>().Texture = test;
+        // a = Instantiate();
+        // a.Transform.Position = new Vector2(0.0f, 0.0f);
+        // a.Transform.Scale = Vector2.One;
+        // a.AddComponent<Sprite>().Texture = test;
         
         b = Instantiate();
         b.Transform.Position = new Vector2(-100.0f, 300.0f);
-        a.Transform.AddChild(b.Transform);
+        // a.Transform.AddChild(b.Transform);
         b.AddComponent<Sprite>().Texture = test;
         
         var gizmoObject = Instantiate();
@@ -73,6 +74,13 @@ public class EditorScene1 : Scene
             gizmoObject.Active = selectedGameObject != null;
             gizmoObject.Transform.Parent = selectedGameObject?.Transform;
         };
+
+        b.Transform.TweenPosition(Vector2.One * 700f, 1.0f)
+            .SetEasingType(EasingType.Linear)
+            .SetLoopMode(LoopMode.Restart);
+        b.Transform.TweenRotation(MathHelper.ToRadians(360f), 1.0f)
+            .SetEasingType(EasingType.Linear)
+            .SetLoopMode(LoopMode.Restart);
     }
 
     protected override void LoadContent()
@@ -83,8 +91,8 @@ public class EditorScene1 : Scene
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
-        a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
-        b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
+        // a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
+        // b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
         
         imGuiManager.Update(gameTime);
     }

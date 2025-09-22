@@ -13,7 +13,7 @@ public static class BasicImGuiConsoleCommands
         return "Hello";
     }
     
-    [ImGuiConsoleCommand("HELP_COMMAND", typeof(BasicImGuiConsoleCommands), nameof(HelpCommand))]
+    [ImGuiConsoleCommand("HELP_COMMAND", typeof(BasicImGuiConsoleCommands), nameof(HelpCommand), "Print fields, description of a command")]
     public static string HelpCommand(string command)
     {
         ImGuiConsoleCommand? consoleCommand = 
@@ -23,7 +23,7 @@ public static class BasicImGuiConsoleCommands
         return "[warning] Command not found";
     }
     
-    [ImGuiConsoleCommand("HELP", typeof(BasicImGuiConsoleCommands), nameof(Help))]
+    [ImGuiConsoleCommand("HELP", typeof(BasicImGuiConsoleCommands), nameof(Help), "Print all commands according to pages")]
     public static string Help(int page = 0)
     {
         const int MAX_RESULT = 8;
