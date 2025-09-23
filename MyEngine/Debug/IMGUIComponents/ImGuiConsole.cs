@@ -18,7 +18,7 @@ public class ImGuiConsole : ImGuiComponent
     
     List<string> _logs = new List<string>();
     List<string> _history = new List<string>();
-    private List<ImGuiConsoleCommand> _commands = new List<ImGuiConsoleCommand>();
+    private Dictionary<string, ImGuiConsoleCommand> _commands => ImGuiConsoleCommand.ConsoleCommands;
     bool _autoScroll = true;
     private string _filter = "";
     
@@ -28,7 +28,7 @@ public class ImGuiConsole : ImGuiComponent
     
     public ImGuiConsole(ImGuiRenderer renderer, Scene scene) : base(renderer, scene)
     {
-        _commands = ImGuiConsoleCommand.ConsoleCommands;
+        
     }
 
 
@@ -146,8 +146,7 @@ public class ImGuiConsole : ImGuiComponent
         _scrollToBottom = true;
 
         // Get all methods
-        var methodInfo = _commands.Find((value) => value.Command.Equals(command));
-        if (methodInfo != null)
+        if (_commands.TryGetValue(command, out ImGuiConsoleCommand? methodInfo))
         {
             AddLog("> Executing command: " + command);
             

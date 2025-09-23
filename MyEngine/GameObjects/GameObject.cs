@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MyEngine.Collision;
 using MyEngine.Components;
 
 namespace MyEngine.GameObjects;
@@ -82,12 +83,18 @@ public sealed class GameObject
     
     public T? GetComponent<T>() where T : Component
     {
-        return _components.Find(c => c is T) as T;
+        return (T?)_components.Find(c => c is T);
     }
     
     public bool HasComponent<T>() where T : Component
     {
         return _components.Find(c => c is T) != null;
+    }
+
+    public bool TryGetComponent<T>(out T component) where T : Component
+    {
+        component = (T)_components.Find(c => c is T);
+        return component != null;
     }
 
     public void Initialize(ContentManager content)
@@ -98,6 +105,16 @@ public sealed class GameObject
             component.Initialize(content);
         }
     }
+
+    public void Destroy()
+    {
+        foreach (var component in _components)
+        {
+            component.OnDestroy();
+        }
+        _components.Clear();
+        Scene.RemoveGameObject(this);
+    }
     
     public void UpdateComponents(GameTime gameTime)
     {
@@ -106,6 +123,14 @@ public sealed class GameObject
         {
             if (component.Active)
                 component.Update(gameTime);
+        }
+    }
+
+    public void OnCollision(CollisionResult collision)
+    {
+        foreach (var component in _components)
+        {
+            component.OnCollision(collision);
         }
     }
     

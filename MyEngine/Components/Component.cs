@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MyEngine.Collision;
 using MyEngine.GameObjects;
 using MyEngine.Interfaces;
 using MyEngine.Utils;
@@ -12,10 +13,10 @@ namespace MyEngine.Components;
 
 public abstract class Component : IMyUpdateable, IMyDrawable
 {
-    private int _updateOrder;
-    private int _drawOrder;
-    private bool _active = true;
-    private bool _activeSelf = true;
+    protected int _updateOrder;
+    protected int _drawOrder;
+    protected bool _active = true;
+    protected bool _activeSelf = true;
     
     public GameObject GameObject { get; internal set; }
     public Transform Transform { get; internal set; }
@@ -66,6 +67,10 @@ public abstract class Component : IMyUpdateable, IMyDrawable
     }
 
     protected virtual void LoadContent(ContentManager content) {}
+    
+    public virtual void OnDestroy() {}
+    
+    public virtual void OnCollision(CollisionResult collision) {}
     
     public virtual void Update(GameTime gameTime) { }
 

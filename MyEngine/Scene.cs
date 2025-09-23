@@ -123,7 +123,7 @@ public abstract class Scene : IDisposable
     // This function is deffered (Wait until the next update)
     public void RemoveGameObject(GameObject gameObject)
     {
-        uninitGameObjects.Remove(gameObject);
+        gameObjects.Remove(gameObject);
     }
     
     /// <summary>

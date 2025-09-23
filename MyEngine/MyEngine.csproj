@@ -10,6 +10,7 @@
             <PrivateAssets>All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Nopipeline.Task" Version="2.3.0" />
+        <PackageReference Include="SharpDX.Mathematics" Version="4.0.1" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\ImGuiRenderer\ImGuiRenderer.csproj" />

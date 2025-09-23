@@ -27,8 +27,8 @@ public class ImGuiConsoleCommand : Attribute
         _description = description;
     }
 
-    private static List<ImGuiConsoleCommand> _commands;
-    public static List<ImGuiConsoleCommand> ConsoleCommands
+    private static Dictionary<string, ImGuiConsoleCommand> _commands;
+    public static Dictionary<string, ImGuiConsoleCommand> ConsoleCommands
     {
         get 
         { 
@@ -43,7 +43,7 @@ public class ImGuiConsoleCommand : Attribute
     }
     public static void GetAllConsoleCommands()
     {
-        List<ImGuiConsoleCommand> commands = new List<ImGuiConsoleCommand>();
+        Dictionary<string, ImGuiConsoleCommand> commands = new Dictionary<string, ImGuiConsoleCommand>();
         Assembly assembly = Assembly.GetExecutingAssembly();
 
         foreach (Type type in assembly.GetTypes())
@@ -52,9 +52,9 @@ public class ImGuiConsoleCommand : Attribute
             foreach (var method in type.GetMethods(flags))
             {
                 var command = method.GetCustomAttribute<ImGuiConsoleCommand>();
-                if (command != null)
+                if (command != null && !commands.ContainsKey(command.Command))
                 {
-                    commands.Add(command);   
+                    commands.Add(command.Command, command);   
                 }
             }
         }

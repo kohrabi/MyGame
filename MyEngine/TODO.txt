@@ -7,10 +7,10 @@
 [X] Add ImGuiConsole
 [X] Add ImGuiGameObjectsList
 [X] Add Coroutine system
-[ ] Add Tween Manager
-[ ] Refactor the entire GlobalManager System
+[X] Add Tween Manager
 [ ] Add CollisionSystem
 [ ] Add Physics Engine
+[ ] Refactor the entire GlobalManager System
 [ ] Add Fixed Update
 [ ] Add AnimatedSprite Component
 [ ] Add Input System

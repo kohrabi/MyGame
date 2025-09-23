@@ -2,16 +2,16 @@
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MyEngine.Graphics;
 using Num =  System.Numerics;
 
 namespace MyEngine.Debug.IMGUIComponents;
 
 public class ImGuiViewportRender : ImGuiComponent
 {
-    
     readonly Vector2 DEFAULT_RENDER_TARGET_SIZE = new Vector2(1280, 720);
     readonly Vector2 PADDING = new Vector2(-20, -30);
-    private RenderTarget2D _renderTarget;
+    private MyRenderTarget _myRenderTarget;
     private nint _renderTargetPointer;
     private Texture2D _renderTargetTexture;
     Color[] _renderTargetData;
@@ -40,20 +40,21 @@ public class ImGuiViewportRender : ImGuiComponent
         {
 
             // Get Render data
-            _renderTarget.GetData(_renderTargetData);
+            _myRenderTarget.RenderTarget.GetData(_renderTargetData);
             _renderTargetTexture.SetData(_renderTargetData);
             
             // Set center
-            Num.Vector2 size = new Num.Vector2(_renderTarget.Width, _renderTarget.Height);
+            Num.Vector2 size = new Num.Vector2(_myRenderTarget.RenderTarget.Width, _myRenderTarget.RenderTarget.Height);
             Num.Vector2 avail = ImGui.GetContentRegionAvail();
             ImGui.SetCursorPos(ImGui.GetCursorPos() + (avail - size) / 2.0f);
+            _myRenderTarget.Position = ImGui.GetWindowPos() + ImGui.GetCursorPos() - (avail - size) / 2.0f;
             
             // Render
             ImGui.Image(_renderTargetPointer, size);
             
             // If it is resized, queue and recreate 
             _windowSize = avail;
-            if (!_windowSize.Equals(new Num.Vector2(_renderTarget.Width, _renderTarget.Height)))
+            if (!_windowSize.Equals(new Num.Vector2(_myRenderTarget.RenderTarget.Width, _myRenderTarget.RenderTarget.Height)))
                 _resizeWindow = true;
             
         }
@@ -66,18 +67,18 @@ public class ImGuiViewportRender : ImGuiComponent
         if (size.X <= 20 || size.Y <= 20)
             return;
         
-        if (_renderTarget != null)
-            _renderTarget.Dispose();
-        _renderTarget = new RenderTarget2D(Core.GraphicsDevice, (int)size.X, (int)size.Y);
+        if (_myRenderTarget.RenderTarget != null)
+            _myRenderTarget.RenderTarget.Dispose();
+        _myRenderTarget.RenderTarget = new RenderTarget2D(Core.GraphicsDevice, (int)size.X, (int)size.Y);
         
-        _renderTargetData = new Color[_renderTarget.Width * _renderTarget.Height];
+        _renderTargetData = new Color[_myRenderTarget.RenderTarget.Width * _myRenderTarget.RenderTarget.Height];
         if (_renderTargetTexture != null)
             _renderTargetTexture.Dispose();
-        _renderTargetTexture = new Texture2D(Core.GraphicsDevice, _renderTarget.Width, _renderTarget.Height);
+        _renderTargetTexture = new Texture2D(Core.GraphicsDevice, _myRenderTarget.RenderTarget.Width, _myRenderTarget.RenderTarget.Height);
         
         if (_renderTargetPointer != 0)
             ImGuiRenderer.UnbindTexture(_renderTargetPointer);
         _renderTargetPointer = ImGuiRenderer.BindTexture(_renderTargetTexture);
-        Scene.MainCamera.RenderTarget2D = _renderTarget;
+        Scene.MainCamera.MyRenderTarget = _myRenderTarget;
     }
 }

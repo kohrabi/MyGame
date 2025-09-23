@@ -13,6 +13,12 @@ public class Transform : Component
 {
     private List<Transform> _children = new();
     
+    private new bool Active
+    {
+        get => _active;
+        set => _active = value;
+    }
+    
     private Vector2 _position;
     private float _rotation;
     private Vector2 _scale;

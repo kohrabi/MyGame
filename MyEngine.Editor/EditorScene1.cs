@@ -74,13 +74,13 @@ public class EditorScene1 : Scene
             gizmoObject.Active = selectedGameObject != null;
             gizmoObject.Transform.Parent = selectedGameObject?.Transform;
         };
-
-        b.Transform.TweenPosition(Vector2.One * 700f, 1.0f)
-            .SetEasingType(EasingType.Linear)
-            .SetLoopMode(LoopMode.Restart);
-        b.Transform.TweenRotation(MathHelper.ToRadians(360f), 1.0f)
-            .SetEasingType(EasingType.Linear)
-            .SetLoopMode(LoopMode.Restart);
+        //
+        // b.Transform.TweenPosition(Vector2.One * 700f, 1.0f)
+        //     .SetEasingType(EasingType.Linear)
+        //     .SetLoopMode(LoopMode.Restart);
+        // b.Transform.TweenRotation(MathHelper.ToRadians(360f), 1.0f)
+        //     .SetEasingType(EasingType.Linear)
+        //     .SetLoopMode(LoopMode.Restart);
     }
 
     protected override void LoadContent()
