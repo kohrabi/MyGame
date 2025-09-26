@@ -26,45 +26,45 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
         if (_isOutlined)
         {   
             spriteBatch.Draw(
-                DebugDraw._whiteRectangle,
+                DebugDraw.WhiteRectangle,
                 _position - Vector2.UnitY * _size.Y / 2,
                 null,
                 _color,
                 0f,
-                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
+                new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
                 new Vector2(_size.X, _outlineThickness),
                 SpriteEffects.None,
                 0f
             );
             spriteBatch.Draw(
-                DebugDraw._whiteRectangle,
+                DebugDraw.WhiteRectangle,
                 _position + Vector2.UnitY * _size.Y / 2,
                 null,
                 _color,
                 0f,
-                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
+                new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
                 new Vector2(_size.X, _outlineThickness),
                 SpriteEffects.None,
                 0f
             );
             spriteBatch.Draw(
-                DebugDraw._whiteRectangle,
+                DebugDraw.WhiteRectangle,
                 _position + Vector2.UnitX * _size.X / 2,
                 null,
                 _color,
                 0f,
-                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
+                new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
                 new Vector2(_outlineThickness, _size.Y),
                 SpriteEffects.None,
                 0f
             );
             spriteBatch.Draw(
-                DebugDraw._whiteRectangle,
+                DebugDraw.WhiteRectangle,
                 _position - Vector2.UnitX * _size.X / 2,
                 null,
                 _color,
                 0f,
-                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
+                new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
                 new Vector2(_outlineThickness, _size.Y),
                 SpriteEffects.None,
                 0f
@@ -73,12 +73,12 @@ public class DebugDrawRectangle : IDebugDrawPrimitive
         else
         {
             spriteBatch.Draw(
-                DebugDraw._whiteRectangle,
+                DebugDraw.WhiteRectangle,
                 _position,
                 null,
                 _color,
                 0f,
-                new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
+                new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
                 _size,
                 SpriteEffects.None,
                 0f

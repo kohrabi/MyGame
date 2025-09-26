@@ -24,6 +24,31 @@
 				"TextureFormat": "Color"
 			}
 		},
+		"asepriteJson":
+		{
+		    "path": "Sprites/*.json",
+		    "recursive": "True",
+		    "action": "copy",
+		},
+        "fonts":
+        {
+            "path": "Fonts/*.spritefont",
+            "recursive": "True",
+            "action": "build",
+            "importer": "FontDescriptionImporter",
+            "processor": "FontDescriptionProcessor",
+            "processorParam":
+            {
+                "PremultiplyAlpha": "True",
+                "TextureFormat": "Compressed",
+            }
+        },
+        "imGuiFonts":
+        {
+            "path": "ImGuiFonts/*.ttf",
+            "recursive": "True",
+            "action": "copy"
+        },
 		"imguiIni":
 		{
 			"path": "ImGuiIni/*.ini",

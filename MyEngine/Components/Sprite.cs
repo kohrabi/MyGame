@@ -8,9 +8,9 @@ namespace MyEngine.Components;
 
 public class Sprite : Component
 {
-    private Texture2D _texture = null;
-    private Rectangle? _sourceRectangle = null;
-    private Vector2 _origin = Vector2.One / 2.0f;
+    protected Texture2D _texture = null;
+    protected Rectangle? _sourceRectangle = null;
+    protected Vector2 _origin = Vector2.One / 2.0f;
 
     [SerializeField] 
     public double blablabla = 1;
@@ -33,6 +33,8 @@ public class Sprite : Component
         get => _origin;
         set => _origin = value;
     }
+    
+    public Color Color { get; set; } = Color.White;
 
 
     public override void Initialize(ContentManager content)
@@ -50,11 +52,11 @@ public class Sprite : Component
             Texture, 
             Transform.GlobalPosition, 
             SourceRectangle, 
-            Color.White, 
+            Color, 
             Transform.GlobalRotation,
-            new Vector2(Texture.Width, Texture.Height) * Origin, 
+            (SourceRectangle.HasValue ? SourceRectangle.Value.Size.ToVector2() : new Vector2(Texture.Width, Texture.Height)) * Origin, 
             Transform.GlobalScale,
             SpriteEffects.None, 
-            0.0f);
+            0.5f);
     }
 }

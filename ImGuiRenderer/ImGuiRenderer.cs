@@ -73,6 +73,46 @@ namespace ImGuiNET.Renderer
         #region ImGuiRenderer
 
         /// <summary>
+        /// This will rebuild the font atlas for every new font please be careful
+        /// </summary>
+        /// <param name="path">Path to TTFFile</param>
+        /// <param name="glyphMin">Glyph Min</param>
+        /// <param name="glyphMax">Glyph Max</param>
+        /// <returns></returns>
+        public ImFontPtr AddFontFromFileTTF(string path, float fontSize, ushort glyphMin, ushort glyphMax)
+        {
+            ImFontPtr fontPtr;
+            var io = ImGui.GetIO();
+            unsafe
+            {
+                ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig();
+                config.MergeMode = true;
+                config.PixelSnapH = true;
+            
+                // Yes this was chatgpted i'm stupid
+                ushort[] iconRange = { glyphMin, glyphMax, 0 };
+                // Pin the glyph range
+                GCHandle handle = GCHandle.Alloc(iconRange, GCHandleType.Pinned);
+                try
+                {
+                    IntPtr rangePtr = handle.AddrOfPinnedObject();
+        
+                    // Merge Font Awesome into the base font
+                    fontPtr = io.Fonts.AddFontFromFileTTF(path, fontSize, config, rangePtr);
+                }
+                finally
+                {
+                    handle.Free();
+                }
+        
+                config.Destroy();
+            }
+            RebuildFontAtlas();
+
+            return fontPtr;
+        }
+        
+        /// <summary>
         /// Creates a texture and loads the font data from ImGui. Should be called when the <see cref="GraphicsDevice" /> is initialized but before any rendering is done
         /// </summary>
         public virtual unsafe void RebuildFontAtlas()

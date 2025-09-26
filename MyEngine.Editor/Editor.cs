@@ -10,7 +10,6 @@ namespace MyEngine.Editor;
 public class Editor : MyEngine.Core
 {
         
-    EditorScene1 scene1;
         
     public Editor()
         : base("My Game Title", 1280, 720, false)
@@ -25,7 +24,6 @@ public class Editor : MyEngine.Core
     {
         base.Initialize();
         
-        scene1 = new EditorScene1();
-        SceneManager.Instance.LoadScene(scene1);
+        SceneManager.Instance.LoadScene(new SpriteEditor.SpriteEditor());
     }
 }

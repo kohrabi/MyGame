@@ -21,8 +21,8 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
     
     public event SelectedGameObjectChange OnSelectedGameObjectChanged;
     
-    public ImGuiGameObjectsWindow(ImGuiRenderer imGuiRenderer, Scene scene)
-        : base(imGuiRenderer, scene)
+    public ImGuiGameObjectsWindow(ImGuiRenderer imGuiRenderer, Scene scene, int id)
+        : base(imGuiRenderer, scene, id)
     {
     }
 

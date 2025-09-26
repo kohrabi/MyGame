@@ -1,4 +1,6 @@
-﻿using MyEngine.Components;
+﻿#nullable enable
+using System;
+using MyEngine.Components;
 using MyEngine.Managers;
 
 namespace MyEngine.GameObjects;
@@ -6,18 +8,22 @@ namespace MyEngine.GameObjects;
 public class PrefabBuilder
 {
     private GameObject _gameObject;
-
-    public delegate void ComponentSetup<in T>(T component) where T : Component;
     
     private PrefabBuilder(GameObject gameObject)
     {
         _gameObject = gameObject;
     }
 
-    public PrefabBuilder AddComponent<T>(ComponentSetup<T> componentSetup)  where T : Component
+    public PrefabBuilder AddComponent<T>(Action<T>? componentSetup = null)  where T : Component
     {
         var component = _gameObject.AddComponent<T>();
-        componentSetup.Invoke(component);
+        componentSetup?.Invoke(component);
+        return this;
+    }
+    
+    public PrefabBuilder GetGameObject(Action<GameObject>? gameObjectSetup = null) 
+    {
+        gameObjectSetup?.Invoke(_gameObject);
         return this;
     }
     

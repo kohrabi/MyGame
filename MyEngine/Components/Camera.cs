@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +12,13 @@ public class Camera : Component
 {
     private MyRenderTarget _myRenderTarget = new MyRenderTarget();
 
-    public RenderTarget2D RenderTarget2D
+    public float Zoom
+    {
+        get => Transform.Scale.X;
+        set => Transform.Scale = Vector2.One * MathHelper.Clamp(value, 0.1f, 10.0f);
+    }
+    
+    public RenderTarget2D? RenderTarget2D
     {
         get => _myRenderTarget.RenderTarget;
     }
@@ -30,9 +37,15 @@ public class Camera : Component
     // Can i get the view matrix from Transform.LocalMatrix?
     public Matrix GetViewMatrix()
     {
-        return Matrix.CreateTranslation(new Vector3(-Transform.Position, 0)) *
-               Matrix.CreateRotationZ(MathHelper.ToRadians(-Transform.Rotation)) *
-               Matrix.CreateScale(new Vector3(Transform.Scale, 1));
+        return Matrix.Invert(Transform.WorldMatrix);
+    }
+
+    public void CenterPosition(Vector2 position)
+    {
+        if (RenderTarget2D != null)
+            Transform.GlobalPosition = position - new Vector2(RenderTarget2D.Width / 2.0f, RenderTarget2D.Height / 2.0f);
+        else
+            Transform.GlobalPosition = position - new Vector2(Core.GraphicsDevice.Viewport.Width / 2.0f, Core.GraphicsDevice.Viewport.Height / 2.0f);
     }
 
     public void Begin(SpriteBatch spriteBatch)
@@ -46,7 +59,7 @@ public class Camera : Component
             DepthStencilState.Default,
             RasterizerState.CullNone,
             null,
-            transformMatrix: Transform.WorldMatrix
+            transformMatrix: GetViewMatrix()
             );
     }
 
@@ -58,13 +71,13 @@ public class Camera : Component
     public Vector2 ScreenToWorld(Point point)
     {
         if (RenderTarget2D == null)
-           return Vector2.Transform(new Vector2(point.X, point.Y), Matrix.Invert(Transform.WorldMatrix));
+           return Vector2.Transform(new Vector2(point.X, point.Y), Transform.WorldMatrix);
         else
         {
             Vector2 screen = new Vector2(point.X, point.Y);
             // screen = Vector2.Clamp(screen, Vector2.Zero, new Vector2(RenderTarget2D.Width, RenderTarget2D.Height));
             screen -= MyRenderTarget.Position;
-            return Vector2.Transform(screen, Matrix.Invert(Transform.WorldMatrix));
+            return Vector2.Transform(screen, Transform.WorldMatrix);
         }
     }
 }

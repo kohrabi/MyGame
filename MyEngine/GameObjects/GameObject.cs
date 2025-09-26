@@ -66,7 +66,7 @@ public sealed class GameObject
         _components.Add(Transform);
     }
     
-    public T AddComponent<T>() where T : Component
+    public T AddComponent<T>(params object[] varargs) where T : Component
     {
         T? returnComponent = (T?)_components.Find(c => c is T);
         if (returnComponent != null)
@@ -74,7 +74,7 @@ public sealed class GameObject
             Console.WriteLine("Component type " + typeof(T).FullName + " already exists in GameObject " + Name);
             return returnComponent;
         }
-        T component = Activator.CreateInstance<T>();
+        T component = Activator.CreateInstance(typeof(T), varargs) as T;
         component.GameObject = this;
         component.Transform = Transform;
         _components.Add(component);

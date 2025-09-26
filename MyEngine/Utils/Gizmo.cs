@@ -10,7 +10,6 @@ namespace MyEngine.Utils;
 public class Gizmo : Component
 {
     private Texture2D _gizmoTexture;
- 
     
     private Texture2D _gizmoX;
     private RectangleF _gizmoXRect;
@@ -24,6 +23,14 @@ public class Gizmo : Component
     private int holdIndex = 0;
     private Vector2 offset = Vector2.Zero;
     private Vector2 ogPosition = Vector2.Zero;
+
+    public void Reset()
+    {
+        offset = Vector2.Zero;
+        ogPosition = Vector2.Zero;
+        overIndex = 0;
+        holdIndex = 0;
+    }
     
     protected override void LoadContent(ContentManager content)
     {

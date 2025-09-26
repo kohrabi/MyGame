@@ -11,6 +11,7 @@ using MyEngine.GameObjects;
 using MyEngine.Debug.IMGUIComponents;
 using MyEngine.Managers;
 using MyEngine.Utils;
+using MyEngine.Utils.MyMath;
 using MyEngine.Utils.Tween;
 using Num =  System.Numerics;
 
@@ -61,19 +62,44 @@ public class EditorScene1 : Scene
         // a.Transform.Scale = Vector2.One;
         // a.AddComponent<Sprite>().Texture = test;
         
-        b = Instantiate();
-        b.Transform.Position = new Vector2(-100.0f, 300.0f);
-        // a.Transform.AddChild(b.Transform);
-        b.AddComponent<Sprite>().Texture = test;
-        
+        // b = Instantiate();
+        // b.Transform.Position = new Vector2(-100.0f, 300.0f);
+        // // a.Transform.AddChild(b.Transform);
+        // b.AddComponent<Sprite>().Texture = test;
+        //
         var gizmoObject = Instantiate();
-        gizmoObject.AddComponent<Gizmo>();
+        var gizmo = gizmoObject.AddComponent<Gizmo>();
         gizmoObject.Active = false;
         gameObjectWindow.OnSelectedGameObjectChanged += (selectedGameObject) =>
         {
             gizmoObject.Active = selectedGameObject != null;
             gizmoObject.Transform.Parent = selectedGameObject?.Transform;
+            gizmo.Reset();
         };
+
+        PrefabBuilder.Instatiate()
+            .AddComponent<MouseFollow>()
+            .AddComponent<Test>()
+            .AddComponent<Sprite>((c) =>
+            {
+                c.Texture = test;
+            })
+            .AddComponent<BoxPhysicsBody>((boxPhysicsBody) =>
+            {
+                boxPhysicsBody.RectSize = new Vector2(test.Width, test.Height);
+            })
+            .GetGameObject((go) => { go.Transform.Scale = Vector2.One / 2; });
+        
+        PrefabBuilder.Instatiate()
+            .AddComponent<Sprite>((c) =>
+            {
+                c.Texture = test;
+            })
+            .AddComponent<BoxPhysicsBody>((boxPhysicsBody) =>
+            {
+                boxPhysicsBody.RectSize = new Vector2(test.Width, test.Height);
+            })
+            .GetGameObject((go) => { go.Transform.Scale = Vector2.One / 2; });
         //
         // b.Transform.TweenPosition(Vector2.One * 700f, 1.0f)
         //     .SetEasingType(EasingType.Linear)
@@ -104,8 +130,6 @@ public class EditorScene1 : Scene
         imGuiManager.Draw(gameTime);
     }
 
-    private string _inputBuffer = "";
-    private List<string> _log = new List<string>();
     private void ImGuiLayout()
     {
         if (ImGui.BeginMainMenuBar())

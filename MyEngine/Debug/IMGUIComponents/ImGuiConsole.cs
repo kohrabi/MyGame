@@ -26,7 +26,7 @@ public class ImGuiConsole : ImGuiComponent
     private bool _scrollToBottom = false;
     
     
-    public ImGuiConsole(ImGuiRenderer renderer, Scene scene) : base(renderer, scene)
+    public ImGuiConsole(ImGuiRenderer renderer, Scene scene, int id) : base(renderer, scene, id)
     {
         
     }

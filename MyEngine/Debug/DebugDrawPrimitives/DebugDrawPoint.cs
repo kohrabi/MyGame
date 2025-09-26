@@ -19,12 +19,12 @@ public class DebugDrawPoint : IDebugDrawPrimitive
     public void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(
-            DebugDraw._whiteRectangle,
+            DebugDraw.WhiteRectangle,
             _position,
             null,
             _color,
             0f,
-            new Vector2(DebugDraw._whiteRectangle.Width, DebugDraw._whiteRectangle.Height) / 2.0f,
+            new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
             _size,
             SpriteEffects.None,
             0f

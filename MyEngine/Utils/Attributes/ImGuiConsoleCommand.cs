@@ -19,14 +19,14 @@ public class ImGuiConsoleCommand : Attribute
     public MethodInfo Method => _method;
     public string Description => _description;
     
-    public ImGuiConsoleCommand(string command, Type type, string methodName, string description = "")
+    public ImGuiConsoleCommand(string command, string description = "")
     {
-        _command = command.ToUpper();
-        // If this throw some wacky shit, it usually means you have two of the same function
-        _method = type.GetMethod(methodName, flags);
+        _command = command.ToUpper();;
         _description = description;
     }
 
+    public void SetMethod(MethodInfo method) => _method = method;
+    
     private static Dictionary<string, ImGuiConsoleCommand> _commands;
     public static Dictionary<string, ImGuiConsoleCommand> ConsoleCommands
     {
@@ -49,11 +49,12 @@ public class ImGuiConsoleCommand : Attribute
         foreach (Type type in assembly.GetTypes())
         {
             // method-level attributes
-            foreach (var method in type.GetMethods(flags))
+            foreach (MethodInfo method in type.GetMethods(flags))
             {
-                var command = method.GetCustomAttribute<ImGuiConsoleCommand>();
+                ImGuiConsoleCommand command = method.GetCustomAttribute<ImGuiConsoleCommand>();
                 if (command != null && !commands.ContainsKey(command.Command))
                 {
+                    command.SetMethod(method);
                     commands.Add(command.Command, command);   
                 }
             }

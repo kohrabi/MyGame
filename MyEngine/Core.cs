@@ -103,7 +103,7 @@ namespace MyEngine
             RegisterManager(new DebugLog());
             RegisterManager(new CoroutineManager());
             RegisterManager(new TweenManager());
-            GetGlobalManager<CoroutineManager>().StartCoroutine(test());
+            // GetGlobalManager<CoroutineManager>().StartCoroutine(test());
         }
 
         IEnumerator test()

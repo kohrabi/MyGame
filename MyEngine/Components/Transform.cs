@@ -142,7 +142,7 @@ public class Transform : Component
 
     public Matrix WorldMatrix
     {
-        get => Parent != null ? LocalMatrix * Parent.WorldMatrix : LocalMatrix;
+        get => Parent != null ? Parent.WorldMatrix * LocalMatrix : LocalMatrix;
     }
 
     public Transform()

@@ -8,13 +8,13 @@ namespace MyEngine.Utils;
 public static class BasicImGuiConsoleCommands
 {
     
-    [ImGuiConsoleCommand("HELLO", typeof(BasicImGuiConsoleCommands), nameof(Hello))]
+    [ImGuiConsoleCommand("HELLO")]
     public static string Hello()
     {
         return "Hello";
     }
     
-    [ImGuiConsoleCommand("HELP_COMMAND", typeof(BasicImGuiConsoleCommands), nameof(HelpCommand), "Print fields, description of a command")]
+    [ImGuiConsoleCommand("HELP_COMMAND", "Print fields, description of a command")]
     public static string HelpCommand(string command)
     {
         if (ImGuiConsoleCommand.ConsoleCommands.TryGetValue(command, out ImGuiConsoleCommand consoleCommand))
@@ -22,10 +22,10 @@ public static class BasicImGuiConsoleCommands
         return "[warning] Command not found";
     }
     
-    [ImGuiConsoleCommand("HELP", typeof(BasicImGuiConsoleCommands), nameof(Help), "Print all commands according to page")]
+    [ImGuiConsoleCommand("HELP", "Print all commands according to page")]
     public static string Help(int page = 0)
     {
-        const int MAX_RESULT = 1;
+        const int MAX_RESULT = 8;
         if (page * MAX_RESULT > ImGuiConsoleCommand.ConsoleCommands.Count)
             return "[error] Page doesn't exists";
         string result = "[info] Commands Page " + (page) + "/" + (ImGuiConsoleCommand.ConsoleCommands.Count / MAX_RESULT) + '\n';

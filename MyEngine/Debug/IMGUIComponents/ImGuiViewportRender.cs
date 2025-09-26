@@ -2,6 +2,7 @@
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MyEngine.Components;
 using MyEngine.Graphics;
 using Num =  System.Numerics;
 
@@ -17,10 +18,14 @@ public class ImGuiViewportRender : ImGuiComponent
     Color[] _renderTargetData;
     private bool _resizeWindow = false;
     private Vector2 _windowSize;
+    private Camera _camera;
+    
+    public bool IsWindowFocused { get; private set; }
 
-    public ImGuiViewportRender(ImGuiRenderer imGuiRenderer, Scene scene)
-        : base(imGuiRenderer, scene)
+    public ImGuiViewportRender(ImGuiRenderer imGuiRenderer, Scene scene, int id, Camera camera)
+        : base(imGuiRenderer, scene, id)
     {
+        _camera = camera;
         CreateRenderTarget(DEFAULT_RENDER_TARGET_SIZE);
     }
 
@@ -38,7 +43,10 @@ public class ImGuiViewportRender : ImGuiComponent
         ImGui.SetNextWindowSizeConstraints(new Num.Vector2(100f), new Num.Vector2(2560f, 1440f));
         if (ImGui.Begin("GameWindow"))
         {
-
+            IsWindowFocused = false;
+            if (ImGui.IsWindowFocused())
+                IsWindowFocused = true;
+            
             // Get Render data
             _myRenderTarget.RenderTarget.GetData(_renderTargetData);
             _renderTargetTexture.SetData(_renderTargetData);
@@ -79,6 +87,6 @@ public class ImGuiViewportRender : ImGuiComponent
         if (_renderTargetPointer != 0)
             ImGuiRenderer.UnbindTexture(_renderTargetPointer);
         _renderTargetPointer = ImGuiRenderer.BindTexture(_renderTargetTexture);
-        Scene.MainCamera.MyRenderTarget = _myRenderTarget;
+        _camera.MyRenderTarget = _myRenderTarget;
     }
 }
