@@ -23,13 +23,11 @@ public class ImGuiSpriteAnimationViewer : ImGuiComponent
     private Rectangle _sourceRect = new Rectangle();
     private nint _texture;
     private Num.Vector2 _imageSize;
-    private ImFontPtr _fontIcon;
 
     public int CurrentFrame => _frameIndex;
     
-    public ImGuiSpriteAnimationViewer(ImGuiRenderer renderer, Scene scene, int id, ImFontPtr fontIcon) : base(renderer, scene, id)
+    public ImGuiSpriteAnimationViewer(ImGuiRenderer renderer, Scene scene, int id) : base(renderer, scene, id)
     {
-        _fontIcon = fontIcon;
     }
 
     
@@ -126,7 +124,6 @@ public class ImGuiSpriteAnimationViewer : ImGuiComponent
     {
         if (_texture == IntPtr.Zero)
             return;
-        ImGui.PushFont(_fontIcon);
         
         if (ImGui.Begin("AnimationViewer"))
         {
@@ -170,6 +167,5 @@ public class ImGuiSpriteAnimationViewer : ImGuiComponent
             ImGui.Image(_texture, scale * size, pos / dividor, (pos + size) / dividor);
         }
         ImGui.End();
-        ImGui.PopFont();
     }
 }

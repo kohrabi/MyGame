@@ -66,7 +66,7 @@ public class ResizeableRectangle : Component
             switch (selectedScaler)
             {
                 case 1: scalerOffset = -Vector2.One * ScaleSize / 2.0f; break;
-                case 2:  scalerOffset = -new Vector2(-1f, 1f) * ScaleSize / 2.0f; break;
+                case 2: scalerOffset = -new Vector2(-1f, 1f) * ScaleSize / 2.0f; break;
                 case 3: scalerOffset = -new Vector2(1.0f, -1f) * ScaleSize / 2.0f; break;
                 case 4: scalerOffset = Vector2.One * ScaleSize / 2.0f; break;
             }

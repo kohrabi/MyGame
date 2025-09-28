@@ -9,6 +9,7 @@ namespace MyEngine.Components;
 
 public class AnimationFrame
 {
+    // For Aseprite stuff Only
     public int FrameNumber { get; set; }
     public float Duration { get; set; }
     public Rectangle Rectangle { get; set; }

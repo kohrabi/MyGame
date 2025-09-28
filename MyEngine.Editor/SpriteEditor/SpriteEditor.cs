@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,7 +41,7 @@ public class SpriteEditor : Scene
     private Vector2 prevCameraPosition = Vector2.Zero;
     private bool dragging = false;
     private Point downMousePosition = Point.Zero;
-    private AsepriteJson asepriteJson;
+    private AsepriteJson? asepriteJson = null;
     private int selectedAnimation = 0;
     private string[] animations = [""];
     private ImGuiSpriteAnimationViewer animationViewer;
@@ -72,6 +73,7 @@ public class SpriteEditor : Scene
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         gameView = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
+        imGuiManager.AddComponent<FilePicker>();
         SetResizableRectanglesActive(true);
 
         gameView.ComponentExtension += OnGameViewComponentExtension;
@@ -80,46 +82,19 @@ public class SpriteEditor : Scene
         BackgroundColor = new Color(15, 15, 15);
         ImGuiColor.CherryTheme();
         
-        // Before Load Content
-        base.Initialize();
-        // After Load Content
-
-        asepriteJson = AsepriteJson.FromFile(Content, "Sprites/ninja.json");
-        animations = asepriteJson.Animations.ToList().Select((pair => pair.Key)).ToArray();
-
-        PrefabBuilder.Instatiate()
-            .AddComponent<Sprite>((sprite) =>
-            {
-                sprite.Texture = asepriteJson.Texture;
-                sprite.Origin = Vector2.Zero;
-            })
-            .AddComponent<GridComponent>((g) =>
-            {
-                g.Initialize(asepriteJson.Texture.Bounds.Size.ToVector2(), asepriteJson.FrameSize, Color.Gray);
-            })
-            .GetGameObject(o =>
-            {
-                MainCamera.CenterPosition(o.Transform.Position);
-                sprite = o;
-            });
-
-        PrefabBuilder.Instatiate()
-            .AddComponent<ResizeableRectangle>(r =>
-            {
-                currentCreateRectangle = r;
-                currentCreateRectangle.GameObject.Active = false;
-            });
-        
-        texturePointer = imGuiManager.ImGuiRenderer.BindTexture(asepriteJson.Texture);
-
         var fontIcon =
             imGuiManager.ImGuiRenderer.AddFontFromFileTTF(
                 Helpers.GetContentPath(Content, "ImGuiFonts/fontawesome-webfont.ttf"),
                 13.0f,
                 IconFonts.FontAwesome4.IconMin,
                 IconFonts.FontAwesome4.IconMax);
-        animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>(fontIcon);
-        animationViewer.SetAnimation(asepriteJson, "Idle");
+        animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>();
+        
+        // Before Load Content
+        base.Initialize();
+        // After Load Content
+
+        // LoadAsepriteJson("Sprites/ninja.json");
     } 
     
     protected override void LoadContent()
@@ -151,7 +126,7 @@ public class SpriteEditor : Scene
         
         var mouse = Mouse.GetState();
         int scrollValue = mouse.ScrollWheelValue;
-        if (gameView.IsWindowFocused)
+        if (gameView.IsWindowFocused && asepriteJson != null)
         {
             // Zoom in
             if (Math.Abs(scrollValue - prevScrollValue) > 0)
@@ -200,7 +175,6 @@ public class SpriteEditor : Scene
                         currentCreateRectangle.GameObject.Active = false;
                         AnimationFrame frame = new AnimationFrame();
                         frame.Duration = 100.0f;
-                        frame.FrameNumber = asepriteJson.Animations[currentAnimation].Last().FrameNumber + 1;
                         frame.Rectangle = currentCreateRectangle.Rectangle.ToRectangle();
                         asepriteJson.Animations[currentAnimation].Add(frame);
                         int index = asepriteJson.Animations[currentAnimation].Count - 1;
@@ -253,11 +227,48 @@ public class SpriteEditor : Scene
         
         imGuiManager.Draw(gameTime);
     }
-    
-    
+
+    private void LoadAsepriteJson(string path)
+    {
+        asepriteJson = AsepriteJson.FromFileRelative(Content, path);
+        animations = asepriteJson.Animations.ToList().Select((pair => pair.Key)).ToArray();
+        
+        RemoveGameObject(sprite);
+        PrefabBuilder.Instatiate()
+            .AddComponent<Sprite>((sprite) =>
+            {
+                sprite.Texture = asepriteJson.Texture;
+                sprite.Origin = Vector2.Zero;
+            })
+            .AddComponent<GridComponent>((g) =>
+            {
+                g.Initialize(asepriteJson.Texture.Bounds.Size.ToVector2(), asepriteJson.FrameSize, Color.Gray);
+            })
+            .GetGameObject(o =>
+            {
+                MainCamera.CenterPosition(o.Transform.Position);
+                sprite = o;
+            });
+
+        RemoveGameObject(currentCreateRectangle.GameObject);
+        PrefabBuilder.Instatiate()
+            .AddComponent<ResizeableRectangle>(r =>
+            {
+                currentCreateRectangle = r;
+                currentCreateRectangle.GameObject.Active = false;
+            });
+
+        imGuiManager.ImGuiRenderer.UnbindTexture(texturePointer);
+        texturePointer = imGuiManager.ImGuiRenderer.BindTexture(asepriteJson.Texture);
+        
+        animationViewer.SetAnimation(asepriteJson, "Idle");
+    }
 
     private void ChooseAnimation(string name)
     {
+        if (asepriteJson == null)
+            return;
+        
         animationViewer.PlayAnimation(name);
         foreach (var frame in framesRectangle)
         {
@@ -305,7 +316,7 @@ public class SpriteEditor : Scene
             ImGui.Separator();
             
             ImGui.NewLine();
-            ImGui.Text("Current File: " + asepriteJson.FilePath); 
+            ImGui.Text("Current File: " + asepriteJson?.FilePath); 
             // ImGui.SameLine();
             ImGui.Button("Change File");
             ImGui.NewLine();
@@ -320,6 +331,7 @@ public class SpriteEditor : Scene
         }
         ImGui.End();
 
+        
         ImGuiFramesWindow();
     }
 
@@ -329,7 +341,7 @@ public class SpriteEditor : Scene
         if (ImGui.Begin("Frames", ImGuiWindowFlags.HorizontalScrollbar))
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 12.0f); // corner radius in px
-            if (currentAnimation != "")
+            if (currentAnimation != "" && asepriteJson != null)
             {
                 Num.Vector2 SelectableSize = new Num.Vector2(81, 42) * 2.0f;
                 

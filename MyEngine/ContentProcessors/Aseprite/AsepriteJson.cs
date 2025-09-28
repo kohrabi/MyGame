@@ -15,32 +15,18 @@ public class AsepriteJson
     public string FilePath { get; private set; }
     public Texture2D Texture { get; private set; }
     public Vector2 FrameSize { get; private set; }
-    public List<AnimationFrame> AnimationFrames { get; private set; } = new List<AnimationFrame>();
     public Dictionary<string, List<AnimationFrame> > Animations { get; private set; } = new();
 
-    public void AddAnimationFrame(AnimationFrame frame)
+    public static AsepriteJson FromFileRelative(ContentManager content, string path)
     {
-        frame.FrameNumber = AnimationFrames.Count;
-        AnimationFrames.Add(frame);
+        string filePath = Path.Combine(content.RootDirectory + "/" + path);
+        return FromFile(content, Path.GetFullPath(filePath));
     }
     
-    public void AddNewFrameToAnimation(AnimationFrame frame, string animation)
-    {
-        AddAnimationFrame(frame);
-        AddFrameToAnimation(AnimationFrames.Count - 1, animation);
-    }
-    
-    public void AddFrameToAnimation(int frameNumber, string animation)
-    {
-        if (Animations.TryGetValue(animation, out var animationFrame))
-            animationFrame.Add(AnimationFrames[frameNumber]);
-    }
-
     // Currently no rotated, trimmed
     public static AsepriteJson FromFile(ContentManager content, string path)
     {
-        string filePath = Path.Combine(content.RootDirectory + "/" + path);
-        string jsonText = File.ReadAllText(Path.Combine(content.RootDirectory + "/" + path));
+        string jsonText = File.ReadAllText(path);
         AsepriteRawJsonData? jsonData = JsonSerializer.Deserialize<AsepriteRawJsonData>(jsonText);
 
         if (jsonData == null)
@@ -49,7 +35,8 @@ public class AsepriteJson
             throw new ArgumentOutOfRangeException("Yoo there can't be zero frames");
 
         AsepriteJson asepriteJson = new AsepriteJson();
-        string imagePath = Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(jsonData.meta.image);
+        string imagePath = Path.GetRelativePath(content.RootDirectory, Path.GetDirectoryName(path) + "/" +
+                                                                       Path.GetFileNameWithoutExtension(jsonData.meta.image));
         asepriteJson.Texture = content.Load<Texture2D>(imagePath);
         asepriteJson.FrameSize = new Vector2(jsonData.frames[0].sourceSize.w,  jsonData.frames[0].sourceSize.h);
         asepriteJson.FilePath = path;

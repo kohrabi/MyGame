@@ -68,8 +68,7 @@ public class ImGuiViewportRender : ImGuiComponent
             if (!_windowSize.Equals(new Num.Vector2(_myRenderTarget.RenderTarget.Width, _myRenderTarget.RenderTarget.Height)))
                 _resizeWindow = true;
 
-            if (ImGui.IsMouseHoveringRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize()) &&
-                ImGui.IsAnyMouseDown())
+            if (ImGui.IsWindowHovered() && ImGui.IsAnyMouseDown())
             {
                 ImGui.SetWindowFocus();
                 IsWindowFocused = true;
