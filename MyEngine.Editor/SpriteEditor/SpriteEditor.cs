@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using IconFonts;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,6 +21,14 @@ namespace MyEngine.Editor.SpriteEditor;
 
 public class SpriteEditor : Scene
 {
+    private const float CreateModeDelayTime = 0.2f;
+    
+    enum EditorMode
+    {
+        Edit, Create
+    }
+    
+    EditorMode mode = EditorMode.Edit;
     
     private Texture2D test;
 
@@ -35,11 +44,15 @@ public class SpriteEditor : Scene
     private int selectedAnimation = 0;
     private string[] animations = [""];
     private ImGuiSpriteAnimationViewer animationViewer;
-    private List<GameObject> framesRectangle = new List<GameObject>();
+    private List<ResizeableRectangle> framesRectangle = new List<ResizeableRectangle>();
     private nint texturePointer = IntPtr.Zero;
     string currentAnimation = "";
     private int currentFrameSelected = 0;
     private ImGuiViewportRender gameView;
+
+    private float createModeDelayTimer = 0.0f;
+    private bool isCreating = false;
+    private ResizeableRectangle currentCreateRectangle;
     
     public SpriteEditor()
     {
@@ -59,6 +72,9 @@ public class SpriteEditor : Scene
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         gameView = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
+        SetResizableRectanglesActive(true);
+
+        gameView.ComponentExtension += OnGameViewComponentExtension;
         imGuiManager.AddDrawCommand(ImGuiLayout);
         // imGuiManager.AddComponent<ImGuiConsole>();
         BackgroundColor = new Color(15, 15, 15);
@@ -77,15 +93,21 @@ public class SpriteEditor : Scene
                 sprite.Texture = asepriteJson.Texture;
                 sprite.Origin = Vector2.Zero;
             })
-            .AddComponent<RectangleRenderer>((rect) =>
+            .AddComponent<GridComponent>((g) =>
             {
-                rect.Size = new Vector2(asepriteJson.Texture.Width, asepriteJson.Texture.Height);
-                rect.Color = Color.Gray;
+                g.Initialize(asepriteJson.Texture.Bounds.Size.ToVector2(), asepriteJson.FrameSize, Color.Gray);
             })
             .GetGameObject(o =>
             {
                 MainCamera.CenterPosition(o.Transform.Position);
                 sprite = o;
+            });
+
+        PrefabBuilder.Instatiate()
+            .AddComponent<ResizeableRectangle>(r =>
+            {
+                currentCreateRectangle = r;
+                currentCreateRectangle.GameObject.Active = false;
             });
         
         texturePointer = imGuiManager.ImGuiRenderer.BindTexture(asepriteJson.Texture);
@@ -98,11 +120,19 @@ public class SpriteEditor : Scene
                 IconFonts.FontAwesome4.IconMax);
         animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>(fontIcon);
         animationViewer.SetAnimation(asepriteJson, "Idle");
-    }
-
+    } 
+    
     protected override void LoadContent()
     {
         test = Content.Load<Texture2D>("Sprites/test");
+    }
+
+    private void SetResizableRectanglesActive(bool active)
+    {
+        foreach (var frameRectangle in framesRectangle)
+        {
+            frameRectangle.IsResizeable = active;
+        }
     }
 
     public override void Update(GameTime gameTime)
@@ -115,23 +145,25 @@ public class SpriteEditor : Scene
         int scrollValue = mouse.ScrollWheelValue;
         if (gameView.IsWindowFocused)
         {
-                
+            // Zoom in
             if (Math.Abs(scrollValue - prevScrollValue) > 0)
             {
                 MainCamera.Zoom += -(scrollValue - prevScrollValue) / 1000.0f * MainCamera.Zoom;
             }
 
+            // Move Camera
             if (mouse.RightButton == ButtonState.Pressed)
             {
                 if (!dragging)
                 {
                     downMousePosition = mouse.Position;
                     dragging = true;
-                    prevCameraPosition = MainCamera.Transform.GlobalPosition;    
+                    prevCameraPosition = MainCamera.Transform.GlobalPosition;
                 }
                 else
                 {
-                    MainCamera.Transform.GlobalPosition = prevCameraPosition - (mouse.Position - downMousePosition).ToVector2();
+                    MainCamera.Transform.GlobalPosition =
+                        prevCameraPosition - (mouse.Position - downMousePosition).ToVector2();
                 }
             }
             else
@@ -141,7 +173,44 @@ public class SpriteEditor : Scene
                 prevCameraPosition = Vector2.Zero;
             }
 
-            // Sprite Editor View
+            if (createModeDelayTimer > 0)
+                createModeDelayTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            else
+            {
+                if (mode == EditorMode.Create && currentAnimation != "")
+                {
+                    if (mouse.LeftButton == ButtonState.Pressed && !isCreating)
+                    {
+                        isCreating = true;
+                        currentCreateRectangle.Initialize(MainCamera.ScreenToWorld(mouse.Position), Vector2.Zero);
+                        currentCreateRectangle.SetResizeIndex(4);
+                        currentCreateRectangle.GameObject.Active = true;
+                    }
+                    else if (mouse.LeftButton == ButtonState.Released && isCreating)
+                    {
+                        isCreating = false;
+                        currentCreateRectangle.GameObject.Active = false;
+                        AnimationFrame frame = new AnimationFrame();
+                        frame.Duration = 100.0f;
+                        frame.FrameNumber = asepriteJson.Animations[currentAnimation].Last().FrameNumber + 1;
+                        frame.Rectangle = currentCreateRectangle.Rectangle.ToRectangle();
+                        asepriteJson.Animations[currentAnimation].Add(frame);
+                        int index = asepriteJson.Animations[currentAnimation].Count - 1;
+                        PrefabBuilder.Instatiate()
+                            .AddComponent<ResizeableRectangle>(c =>
+                            {
+                                c.Initialize(frame.Rectangle.Location.ToVector2(), frame.Rectangle.Size.ToVector2());
+                                c.OnResized += f =>
+                                {
+                                    asepriteJson.Animations[currentAnimation][index].Rectangle = f;
+                                };
+                                framesRectangle.Add(c);
+                            });
+                    }
+                }
+            }
+
+            // Clamp View
             RectangleF cameraBound = new RectangleF(
                 MainCamera.Transform.GlobalPosition.X, 
                 MainCamera.Transform.GlobalPosition.Y, 
@@ -192,9 +261,13 @@ public class SpriteEditor : Scene
         ImGui.ShowDemoWindow(ref show_test_window);
         if (ImGui.Begin("Settings"))
         {
+            
+            ImGui.NewLine();
+            ImGui.Separator();
+            
             ImGui.NewLine();
             ImGui.Text("Current File: " + asepriteJson.FilePath); 
-            ImGui.SameLine();
+            // ImGui.SameLine();
             ImGui.Button("Change File");
             ImGui.NewLine();
 
@@ -204,6 +277,7 @@ public class SpriteEditor : Scene
             {
                 ChooseAnimation(animations[selectedAnimation]);                        
             }
+
         }
         ImGui.End();
 
@@ -257,27 +331,71 @@ public class SpriteEditor : Scene
         ImGui.End();
         
     }
+    
+    private void OnGameViewComponentExtension()
+    {
+        ImGui.SetNextItemAllowOverlap();
+        Num.Vector2 buttonSize = new Num.Vector2(25.0f);
+        Num.Vector2 cursorPos = ImGui.GetWindowSize() / 2.0f;
+        cursorPos.X -= buttonSize.X * 1;
+        cursorPos.Y = buttonSize.Y * 0.5f + 15.0f;
+        ImGui.SetCursorPos(cursorPos);
+
+        EditorMode currentMode = mode;
+        Num.Vector4 activedColor;
+        unsafe
+        {
+            activedColor = *ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive);
+        }
+
+        if (currentMode == EditorMode.Edit) ImGui.PushStyleColor(ImGuiCol.Button, activedColor);
+        if (ImGui.Button(FontAwesome4.MousePointer, buttonSize))
+        {
+            mode = EditorMode.Edit;
+            SetResizableRectanglesActive(true);
+        }
+
+        if (currentMode == EditorMode.Edit) ImGui.PopStyleColor();
+
+        ImGui.SameLine();
+
+        if (currentMode == EditorMode.Create) ImGui.PushStyleColor(ImGuiCol.Button, activedColor);
+        if (ImGui.Button(FontAwesome4.PlusSquare, buttonSize))
+        {
+            mode = EditorMode.Create;
+            createModeDelayTimer = 1.0f;
+            SetResizableRectanglesActive(false);
+        }
+
+        if (currentMode == EditorMode.Create) ImGui.PopStyleColor();
+    }
 
     private void ChooseAnimation(string name)
     {
         animationViewer.PlayAnimation(name);
         foreach (var frame in framesRectangle)
         {
-            RemoveGameObject(frame);
+            RemoveGameObject(frame.GameObject);
         }
         framesRectangle.Clear();
         currentAnimation = name;
         var frames = asepriteJson.Animations[name];
-        foreach (var frame in frames)
+        for (int i = 0; i < frames.Count; i++)
         {
+            var frame = frames[i];
             PrefabBuilder.Instatiate()
                 .AddComponent<ResizeableRectangle>(c =>
                 {
-                    c.Size = frame.Rectangle.Size.ToVector2();
-                    c.Transform.Position = frame.Rectangle.Location.ToVector2();
-                    c.SetRectangle();
-                })
-                .GetGameObject(o => framesRectangle.Add(o));
+                    c.Initialize(frame.Rectangle.Location.ToVector2(), frame.Rectangle.Size.ToVector2());
+                    int i1 = i;
+                    c.OnResized += f =>
+                    {
+                        asepriteJson.Animations[name][i1].Rectangle = f;
+                    };
+                    framesRectangle.Add(c);
+                });
         }
+        if (mode == EditorMode.Create)
+            SetResizableRectanglesActive(false);
     }
 }

@@ -342,6 +342,11 @@ namespace MyEngine.Utils.MyMath
                    Top < value.Bottom;
         }
 
+        public Rectangle ToRectangle()
+        {
+            return new Rectangle((int)X, (int)Y, (int)Width, (int)Height);
+        }
+
 
         /// <summary>
         /// Gets whether or not the other <see cref="RectangleF"/> floatersects with this rectangle.

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks.Dataflow;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MyEngine.Components;
 using MyEngine.Utils;
 using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using RectangleF = MyEngine.Utils.MyMath.RectangleF;
 
 namespace MyEngine.Editor.SpriteEditor;
@@ -18,40 +20,41 @@ public class ResizeableRectangle : Component
         get => rectangle.Size;
         set => rectangle.Size = value;
     }
+
+    public RectangleF Rectangle => rectangle;
     public Vector2 Origin = Vector2.Zero / 2.0f;
     public float OutlineThickness = 1.0f;
     public int selectedScaler = -1;
+    public Action<Rectangle> OnResized;
     RectangleF rectangle = new RectangleF();
     RectangleF scalerTopLeft = new RectangleF();
     RectangleF scalerTopRight = new RectangleF();
     RectangleF scalerBottomLeft = new RectangleF();
     RectangleF scalerBottomRight = new RectangleF();
+    public bool IsResizeable { get; set; } = true;
     
     private RectangleF orignalRectangle;
     private Vector2 prevMousePosition;
 
-    public void SetRectangle()
+    public void Initialize(Vector2 position, Vector2 size)
     {
+        Transform.GlobalPosition = position;
+        Console.WriteLine(Transform.GlobalPosition);
+        Size = size;
         rectangle.Location = Transform.GlobalPosition;
         rectangle.Offset(-Size * Origin);
+        orignalRectangle = rectangle;
     }
+    
+    public void SetResizeIndex(int index) => selectedScaler = index;
     
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
-        
-        scalerTopLeft.Size = Vector2.One * ScaleSize;
-        scalerTopLeft.Location = Vector2.Round(new Vector2(rectangle.Left, rectangle.Top) - scalerTopLeft.Size / 2f);
-        
-        scalerTopRight.Size = Vector2.One * ScaleSize;
-        scalerTopRight.Location = Vector2.Round(new Vector2(rectangle.Right, rectangle.Top) - scalerTopRight.Size / 2f);
-        
-        scalerBottomLeft.Size = Vector2.One * ScaleSize;
-        scalerBottomLeft.Location = Vector2.Round(new Vector2(rectangle.Left, rectangle.Bottom) - scalerBottomLeft.Size / 2f);
-        
-        scalerBottomRight.Size = Vector2.One * ScaleSize;
-        scalerBottomRight.Location = Vector2.Round(new Vector2(rectangle.Right, rectangle.Bottom) - scalerBottomRight.Size / 2f);
 
+        if (!IsResizeable)
+            return;
+        
         var mouse = Mouse.GetState();
         Vector2 mouseWorldPosition = GameObject.Scene.MainCamera.ScreenToWorld(mouse.Position);
         if (mouse.LeftButton == ButtonState.Pressed)
@@ -81,17 +84,6 @@ public class ResizeableRectangle : Component
         }
         else
         {
-            selectedScaler = -1;
-            if (scalerTopLeft.Contains(mouseWorldPosition))
-                selectedScaler = 1;
-            else if (scalerTopRight.Contains(mouseWorldPosition))
-                selectedScaler = 2;
-            else if (scalerBottomLeft.Contains(mouseWorldPosition))
-                selectedScaler = 3;
-            else if (scalerBottomRight.Contains(mouseWorldPosition))
-                selectedScaler = 4;
-            prevMousePosition = mouseWorldPosition;
-            orignalRectangle = rectangle;
             if (rectangle.Width < 0)
             {
                 rectangle.X += rectangle.Width;
@@ -103,8 +95,38 @@ public class ResizeableRectangle : Component
                 rectangle.Y += rectangle.Height;
                 rectangle.Height = Math.Abs(rectangle.Height);
             }
+
+            
+            selectedScaler = -1;
+            if (scalerTopLeft.Contains(mouseWorldPosition))
+                selectedScaler = 1;
+            else if (scalerTopRight.Contains(mouseWorldPosition))
+                selectedScaler = 2;
+            else if (scalerBottomLeft.Contains(mouseWorldPosition))
+                selectedScaler = 3;
+            else if (scalerBottomRight.Contains(mouseWorldPosition))
+                selectedScaler = 4;
+            prevMousePosition = mouseWorldPosition;
+            orignalRectangle = rectangle;
         }
         
+        scalerTopLeft.Size = Vector2.One * ScaleSize;
+        scalerTopLeft.Location = Vector2.Round(new Vector2(rectangle.Left, rectangle.Top));
+        
+        scalerTopRight.Size = Vector2.One * ScaleSize;
+        scalerTopRight.Location = Vector2.Round(new Vector2(rectangle.Right, rectangle.Top) - Vector2.UnitX * ScaleSize);
+        
+        scalerBottomLeft.Size = Vector2.One * ScaleSize;
+        scalerBottomLeft.Location = Vector2.Round(new Vector2(rectangle.Left, rectangle.Bottom) - Vector2.UnitY * ScaleSize);
+        
+        scalerBottomRight.Size = Vector2.One * ScaleSize;
+        scalerBottomRight.Location = Vector2.Round(new Vector2(rectangle.Right, rectangle.Bottom) - Vector2.One * ScaleSize);
+
+        
+        if (!rectangle.Equals(orignalRectangle))
+        {
+            OnResized?.Invoke(rectangle.ToRectangle());
+        }
     }
 
     public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -112,20 +134,20 @@ public class ResizeableRectangle : Component
         base.Draw(spriteBatch, gameTime);
 
 
-        Vector2 PositionTop = Vector2.Round(rectangle.Location + Size * (Vector2.One / 2.0f - Origin) - Vector2.UnitY * Size.Y / 2);
-        Vector2 PositionBottom = Vector2.Round(rectangle.Location + Size * (Vector2.One / 2.0f - Origin) + Vector2.UnitY * Size.Y / 2);
-        Vector2 PositionRight = Vector2.Round(rectangle.Location + Size * (Vector2.One / 2.0f - Origin) + Vector2.UnitX * Size.X / 2);
-        Vector2 PositionLeft = Vector2.Round(rectangle.Location + Size * (Vector2.One / 2.0f - Origin) - Vector2.UnitX * Size.X / 2);
+        Vector2 PositionTop = Vector2.Round(new Vector2(rectangle.Left, rectangle.Top));
+        Vector2 PositionBottom = Vector2.Round(new Vector2(rectangle.Left, rectangle.Bottom)) - Vector2.UnitY;
+        Vector2 PositionLeft = Vector2.Round(new Vector2(rectangle.Left, rectangle.Top));
+        Vector2 PositionRight = Vector2.Round(new Vector2(rectangle.Right, rectangle.Top)) - Vector2.UnitX;
         
         // Draw Outlined Rectangle
         spriteBatch.Draw(
             DebugDraw.WhiteRectangle,
             PositionTop,
             null,
-            Color.White,
+            new Color(Color.White, 0.5f),
             0f,
-            new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
-            new Vector2(Size.X, OutlineThickness),
+            Vector2.Zero,
+            new Vector2((float)Math.Round(Size.X), OutlineThickness),
             SpriteEffects.None,
             0.9f
         );
@@ -133,10 +155,10 @@ public class ResizeableRectangle : Component
             DebugDraw.WhiteRectangle,
             PositionBottom,
             null,
-            Color.White,
+            new Color(Color.White, 0.5f),
             0f,
-            new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
-            new Vector2(Size.X, OutlineThickness),
+            Vector2.Zero,
+            new Vector2((float)Math.Round(Size.X), OutlineThickness),
             SpriteEffects.None,
             0.9f
         );
@@ -144,10 +166,10 @@ public class ResizeableRectangle : Component
             DebugDraw.WhiteRectangle,
             PositionRight,
             null,
-            Color.White,
+            new Color(Color.White, 0.5f),
             0f,
-            new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
-            new Vector2(OutlineThickness, Size.Y),
+            Vector2.Zero,
+            new Vector2(OutlineThickness, (float)Math.Round(Size.Y)),
             SpriteEffects.None,
             0.9f
         );
@@ -155,10 +177,10 @@ public class ResizeableRectangle : Component
             DebugDraw.WhiteRectangle,
             PositionLeft,
             null,
-            Color.White,
+            new Color(Color.White, 0.5f),
             0f,
-            new Vector2(DebugDraw.WhiteRectangle.Width, DebugDraw.WhiteRectangle.Height) / 2.0f,
-            new Vector2(OutlineThickness, Size.Y),
+            Vector2.Zero,
+            new Vector2(OutlineThickness, (float)Math.Round(Size.Y)),
             SpriteEffects.None,
             0.9f
         );

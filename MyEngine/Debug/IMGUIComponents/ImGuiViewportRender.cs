@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System;
+using ImGuiNET;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,6 +20,8 @@ public class ImGuiViewportRender : ImGuiComponent
     private bool _resizeWindow = false;
     private Vector2 _windowSize;
     private Camera _camera;
+
+    public Action ComponentExtension;
     
     public bool IsWindowFocused { get; private set; }
 
@@ -64,6 +67,15 @@ public class ImGuiViewportRender : ImGuiComponent
             _windowSize = avail;
             if (!_windowSize.Equals(new Num.Vector2(_myRenderTarget.RenderTarget.Width, _myRenderTarget.RenderTarget.Height)))
                 _resizeWindow = true;
+
+            if (ImGui.IsMouseHoveringRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize()) &&
+                ImGui.IsAnyMouseDown())
+            {
+                ImGui.SetWindowFocus();
+                IsWindowFocused = true;
+            }
+            
+            ComponentExtension?.Invoke();
             
         }
         ImGui.End();
