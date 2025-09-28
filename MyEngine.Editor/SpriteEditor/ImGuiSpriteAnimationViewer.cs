@@ -24,6 +24,8 @@ public class ImGuiSpriteAnimationViewer : ImGuiComponent
     private nint _texture;
     private Num.Vector2 _imageSize;
     private ImFontPtr _fontIcon;
+
+    public int CurrentFrame => _frameIndex;
     
     public ImGuiSpriteAnimationViewer(ImGuiRenderer renderer, Scene scene, int id, ImFontPtr fontIcon) : base(renderer, scene, id)
     {
@@ -79,6 +81,12 @@ public class ImGuiSpriteAnimationViewer : ImGuiComponent
     public void SetPaused(bool paused)
     {
         _paused = paused;
+    }
+
+    public void SetCurrentFrame(int frame)
+    {
+        _frameIndex = frame;
+        SetPaused(true);
     }
     
     public void SetSkipFrame(int frameSkip)

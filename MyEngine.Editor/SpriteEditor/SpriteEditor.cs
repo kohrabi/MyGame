@@ -141,6 +141,14 @@ public class SpriteEditor : Scene
         
         imGuiManager.Update(gameTime);
 
+        for (int i = 0; i < framesRectangle.Count; i++) 
+        {
+            var rect = framesRectangle[i];
+            rect.IsChosen = false;
+            if (animationViewer.CurrentFrame == i)
+                rect.IsChosen = true;
+        }
+        
         var mouse = Mouse.GetState();
         int scrollValue = mouse.ScrollWheelValue;
         if (gameView.IsWindowFocused)
@@ -245,6 +253,37 @@ public class SpriteEditor : Scene
         
         imGuiManager.Draw(gameTime);
     }
+    
+    
+
+    private void ChooseAnimation(string name)
+    {
+        animationViewer.PlayAnimation(name);
+        foreach (var frame in framesRectangle)
+        {
+            RemoveGameObject(frame.GameObject);
+        }
+        framesRectangle.Clear();
+        currentAnimation = name;
+        var frames = asepriteJson.Animations[name];
+        for (int i = 0; i < frames.Count; i++)
+        {
+            var frame = frames[i];
+            PrefabBuilder.Instatiate()
+                .AddComponent<ResizeableRectangle>(c =>
+                {
+                    c.Initialize(frame.Rectangle.Location.ToVector2(), frame.Rectangle.Size.ToVector2());
+                    int i1 = i;
+                    c.OnResized += f =>
+                    {
+                        asepriteJson.Animations[name][i1].Rectangle = f;
+                    };
+                    framesRectangle.Add(c);
+                });
+        }
+        if (mode == EditorMode.Create)
+            SetResizableRectanglesActive(false);
+    }
 
     private bool show_test_window = false;
     private void ImGuiLayout()
@@ -281,11 +320,19 @@ public class SpriteEditor : Scene
         }
         ImGui.End();
 
-        if (ImGui.Begin("Frames"))
+        ImGuiFramesWindow();
+    }
+
+    private void ImGuiFramesWindow()
+    {
+        
+        if (ImGui.Begin("Frames", ImGuiWindowFlags.HorizontalScrollbar))
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 12.0f); // corner radius in px
             if (currentAnimation != "")
             {
+                Num.Vector2 SelectableSize = new Num.Vector2(81, 42) * 2.0f;
+                
                 int i = 0;
                 float spacing = ImGui.GetStyle().ItemSpacing.X;
                 float avail = ImGui.GetContentRegionAvail().X;
@@ -296,32 +343,68 @@ public class SpriteEditor : Scene
                     Num.Vector2 pos = animationFrame.Rectangle.Location.ToVector2().ToNumerics();
                     Num.Vector2 size = animationFrame.Rectangle.Size.ToVector2().ToNumerics();
                     Num.Vector2 dividor = new Num.Vector2(asepriteJson.Texture.Width, asepriteJson.Texture.Height);
-                    Num.Vector2 selectableSize = size * 2.0f;
-
-                    if (x + selectableSize.X > avail)
-                    {
-                        x = 0;
-                        ImGui.NewLine();
-                    }
+                    Num.Vector2 selectableSize = SelectableSize;
                     
-                    var prev = ImGui.GetCursorPos();
-                    if (ImGui.Selectable("Frame " + i, currentFrameSelected == i, ImGuiSelectableFlags.None, selectableSize))
+                    Num.Vector2 prevCursorPos = ImGui.GetCursorPos();
+                    if (ImGui.Selectable("Frame " + i, animationViewer.CurrentFrame == i, ImGuiSelectableFlags.None, selectableSize))
                     {
                         currentFrameSelected = i;
+                        animationViewer.SetCurrentFrame(i);
                     }
                     ImGui.SameLine();
                     ImGui.SetNextItemAllowOverlap(); // allow image inside selectable
-                    ImGui.SetCursorPos(prev);
+                    ImGui.SetCursorPos(prevCursorPos);
                     ImGui.Image(texturePointer, selectableSize, pos / dividor, (pos + size) / dividor);
                     
+                    ImGui.PopID();
+                    ImGui.SameLine();
+                    x += selectableSize.X + spacing;
+                    i++;
+                }
+                
+                ImGui.NewLine();
+                x = 0;
+                foreach (var animationFrame in asepriteJson.Animations[currentAnimation])
+                {
+                    ImGui.PushID("AnimationFrame " + i);
+                    Num.Vector2 size = animationFrame.Rectangle.Size.ToVector2().ToNumerics();
+                    Num.Vector2 selectableSize = SelectableSize;
                     
-                    // var drawList = ImGui.GetWindowDrawList();
-                    // uint borderColor = ImGui.GetColorU32(ImGuiCol.Header);
-                    // float thickness = 2.0f;
-                    // drawList.AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), borderColor, 0.0f, ImDrawFlags.None, thickness);
+                    Num.Vector2 cursorPos = new Num.Vector2(x, ImGui.GetCursorPos().Y) + new Num.Vector2(selectableSize.X / 2.0f - 130.0f / 2f, 0.0f);
+                    ImGui.SetCursorPos(cursorPos);
+                    ImGui.SetNextItemWidth(40.0f);
+                    ImGui.Text("Duration");
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(80.0f);
+                    int duration = (int)animationFrame.Duration;
+                    if (ImGui.InputInt("##" + animationFrame.GetHashCode(), ref duration))
+                        animationFrame.Duration = duration;
                     
                     ImGui.PopID();
-                    ImGui.SameLine(0, spacing);
+                    ImGui.SameLine();
+                    x += selectableSize.X + spacing;
+                    i++;
+                }
+                
+                ImGui.NewLine();
+                x = 0;
+                foreach (var animationFrame in asepriteJson.Animations[currentAnimation])
+                {
+                    ImGui.PushID("AnimationFrame " + i);
+                    Num.Vector2 size = animationFrame.Rectangle.Size.ToVector2().ToNumerics();
+                    Num.Vector2 selectableSize = SelectableSize;
+                    
+                    Num.Vector2 cursorPos = new Num.Vector2(x, ImGui.GetCursorPos().Y) + new Num.Vector2(selectableSize.X / 2.0f - 80f / 2f, 0.0f);
+                    ImGui.SetCursorPos(cursorPos);
+                    ImGui.SetNextItemWidth(40.0f);
+                    ImGui.Text("Delete");
+                    ImGui.SameLine();
+                    int duration = (int)animationFrame.Duration;
+                    if (ImGui.Button(FontAwesome4.Trash + "##" + animationFrame.GetHashCode(), Num.Vector2.One * 20.0f))
+                        Console.WriteLine("Delete");
+                    
+                    ImGui.PopID();
+                    ImGui.SameLine();
                     x += selectableSize.X + spacing;
                     i++;
                 }
@@ -329,7 +412,6 @@ public class SpriteEditor : Scene
             ImGui.PopStyleVar();
         }
         ImGui.End();
-        
     }
     
     private void OnGameViewComponentExtension()
@@ -354,48 +436,23 @@ public class SpriteEditor : Scene
             mode = EditorMode.Edit;
             SetResizableRectanglesActive(true);
         }
-
         if (currentMode == EditorMode.Edit) ImGui.PopStyleColor();
-
+        if (ImGui.IsItemHovered())
+            createModeDelayTimer = CreateModeDelayTime;
+        
         ImGui.SameLine();
 
         if (currentMode == EditorMode.Create) ImGui.PushStyleColor(ImGuiCol.Button, activedColor);
         if (ImGui.Button(FontAwesome4.PlusSquare, buttonSize))
         {
             mode = EditorMode.Create;
-            createModeDelayTimer = 1.0f;
+            createModeDelayTimer = CreateModeDelayTime;
             SetResizableRectanglesActive(false);
         }
-
         if (currentMode == EditorMode.Create) ImGui.PopStyleColor();
-    }
 
-    private void ChooseAnimation(string name)
-    {
-        animationViewer.PlayAnimation(name);
-        foreach (var frame in framesRectangle)
-        {
-            RemoveGameObject(frame.GameObject);
-        }
-        framesRectangle.Clear();
-        currentAnimation = name;
-        var frames = asepriteJson.Animations[name];
-        for (int i = 0; i < frames.Count; i++)
-        {
-            var frame = frames[i];
-            PrefabBuilder.Instatiate()
-                .AddComponent<ResizeableRectangle>(c =>
-                {
-                    c.Initialize(frame.Rectangle.Location.ToVector2(), frame.Rectangle.Size.ToVector2());
-                    int i1 = i;
-                    c.OnResized += f =>
-                    {
-                        asepriteJson.Animations[name][i1].Rectangle = f;
-                    };
-                    framesRectangle.Add(c);
-                });
-        }
-        if (mode == EditorMode.Create)
-            SetResizableRectanglesActive(false);
+        if (ImGui.IsItemHovered())
+            createModeDelayTimer = CreateModeDelayTime;
+
     }
 }

@@ -26,11 +26,13 @@ public class ResizeableRectangle : Component
     public float OutlineThickness = 1.0f;
     public int selectedScaler = -1;
     public Action<Rectangle> OnResized;
+    public bool IsChosen = false;
     RectangleF rectangle = new RectangleF();
     RectangleF scalerTopLeft = new RectangleF();
     RectangleF scalerTopRight = new RectangleF();
     RectangleF scalerBottomLeft = new RectangleF();
     RectangleF scalerBottomRight = new RectangleF();
+    private Vector2 offset = Vector2.Zero;
     public bool IsResizeable { get; set; } = true;
     
     private RectangleF orignalRectangle;
@@ -59,6 +61,16 @@ public class ResizeableRectangle : Component
         Vector2 mouseWorldPosition = GameObject.Scene.MainCamera.ScreenToWorld(mouse.Position);
         if (mouse.LeftButton == ButtonState.Pressed)
         {
+            // Offset
+            Vector2 scalerOffset = Vector2.Zero;
+            switch (selectedScaler)
+            {
+                case 1: scalerOffset = -Vector2.One * ScaleSize / 2.0f; break;
+                case 2:  scalerOffset = -new Vector2(-1f, 1f) * ScaleSize / 2.0f; break;
+                case 3: scalerOffset = -new Vector2(1.0f, -1f) * ScaleSize / 2.0f; break;
+                case 4: scalerOffset = Vector2.One * ScaleSize / 2.0f; break;
+            }
+            mouseWorldPosition -= scalerOffset;
             switch (selectedScaler)
             {
                 case 1:
@@ -67,7 +79,7 @@ public class ResizeableRectangle : Component
                     break;
                 
                 case 2:
-                    rectangle.Location = new Vector2(orignalRectangle.X, mouseWorldPosition.Y - orignalRectangle.Y);
+                    rectangle.Location = new Vector2(orignalRectangle.X, mouseWorldPosition.Y);
                     rectangle.Size = new Vector2(mouseWorldPosition.X - rectangle.X, orignalRectangle.Bottom - rectangle.Y);
                     break;
                 
@@ -95,7 +107,6 @@ public class ResizeableRectangle : Component
                 rectangle.Y += rectangle.Height;
                 rectangle.Height = Math.Abs(rectangle.Height);
             }
-
             
             selectedScaler = -1;
             if (scalerTopLeft.Contains(mouseWorldPosition))
@@ -106,6 +117,7 @@ public class ResizeableRectangle : Component
                 selectedScaler = 3;
             else if (scalerBottomRight.Contains(mouseWorldPosition))
                 selectedScaler = 4;
+            offset = Vector2.Zero;
             prevMousePosition = mouseWorldPosition;
             orignalRectangle = rectangle;
         }
@@ -135,16 +147,18 @@ public class ResizeableRectangle : Component
 
 
         Vector2 PositionTop = Vector2.Round(new Vector2(rectangle.Left, rectangle.Top));
-        Vector2 PositionBottom = Vector2.Round(new Vector2(rectangle.Left, rectangle.Bottom)) - Vector2.UnitY;
+        Vector2 PositionBottom = Vector2.Round(new Vector2(rectangle.Left, rectangle.Bottom)) - Vector2.UnitY * OutlineThickness;
         Vector2 PositionLeft = Vector2.Round(new Vector2(rectangle.Left, rectangle.Top));
-        Vector2 PositionRight = Vector2.Round(new Vector2(rectangle.Right, rectangle.Top)) - Vector2.UnitX;
+        Vector2 PositionRight = Vector2.Round(new Vector2(rectangle.Right, rectangle.Top)) - Vector2.UnitX * OutlineThickness;
         
         // Draw Outlined Rectangle
+        Color outlineColor = IsChosen ? new Color(Color.Green, 0.5f) : new Color(Color.White, 0.5f);
+        
         spriteBatch.Draw(
             DebugDraw.WhiteRectangle,
             PositionTop,
             null,
-            new Color(Color.White, 0.5f),
+            outlineColor,
             0f,
             Vector2.Zero,
             new Vector2((float)Math.Round(Size.X), OutlineThickness),
@@ -155,7 +169,7 @@ public class ResizeableRectangle : Component
             DebugDraw.WhiteRectangle,
             PositionBottom,
             null,
-            new Color(Color.White, 0.5f),
+            outlineColor,
             0f,
             Vector2.Zero,
             new Vector2((float)Math.Round(Size.X), OutlineThickness),
@@ -166,7 +180,7 @@ public class ResizeableRectangle : Component
             DebugDraw.WhiteRectangle,
             PositionRight,
             null,
-            new Color(Color.White, 0.5f),
+            outlineColor,
             0f,
             Vector2.Zero,
             new Vector2(OutlineThickness, (float)Math.Round(Size.Y)),
@@ -177,7 +191,7 @@ public class ResizeableRectangle : Component
             DebugDraw.WhiteRectangle,
             PositionLeft,
             null,
-            new Color(Color.White, 0.5f),
+            outlineColor,
             0f,
             Vector2.Zero,
             new Vector2(OutlineThickness, (float)Math.Round(Size.Y)),

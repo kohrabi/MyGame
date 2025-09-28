@@ -15,8 +15,26 @@ public class AsepriteJson
     public string FilePath { get; private set; }
     public Texture2D Texture { get; private set; }
     public Vector2 FrameSize { get; private set; }
+    public List<AnimationFrame> AnimationFrames { get; private set; } = new List<AnimationFrame>();
     public Dictionary<string, List<AnimationFrame> > Animations { get; private set; } = new();
 
+    public void AddAnimationFrame(AnimationFrame frame)
+    {
+        frame.FrameNumber = AnimationFrames.Count;
+        AnimationFrames.Add(frame);
+    }
+    
+    public void AddNewFrameToAnimation(AnimationFrame frame, string animation)
+    {
+        AddAnimationFrame(frame);
+        AddFrameToAnimation(AnimationFrames.Count - 1, animation);
+    }
+    
+    public void AddFrameToAnimation(int frameNumber, string animation)
+    {
+        if (Animations.TryGetValue(animation, out var animationFrame))
+            animationFrame.Add(AnimationFrames[frameNumber]);
+    }
 
     // Currently no rotated, trimmed
     public static AsepriteJson FromFile(ContentManager content, string path)
