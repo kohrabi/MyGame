@@ -35,9 +35,19 @@ public class AsepriteJson
             throw new ArgumentOutOfRangeException("Yoo there can't be zero frames");
 
         AsepriteJson asepriteJson = new AsepriteJson();
-        string imagePath = Path.GetRelativePath(content.RootDirectory, Path.GetDirectoryName(path) + "/" +
+        string imageLoadPath = Path.GetRelativePath(content.RootDirectory, Path.GetDirectoryName(path) + "/" +
                                                                        Path.GetFileNameWithoutExtension(jsonData.meta.image));
-        asepriteJson.Texture = content.Load<Texture2D>(imagePath);
+        string imagePathXnb = Path.GetFullPath(Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(jsonData.meta.image) + ".xnb");
+        string imagePathJson = Path.GetFullPath(Path.GetDirectoryName(path) + "/" + jsonData.meta.image);
+        if (!File.Exists(imagePathXnb))
+        {
+            if (!File.Exists(imagePathJson))
+                throw new ArgumentException("Cannot load because image file " + imagePathXnb + " doesn't exists in original format nor .xnb");
+            else
+                asepriteJson.Texture = Texture2D.FromFile(Core.GraphicsDevice, imagePathJson);
+        }
+        else
+            asepriteJson.Texture = content.Load<Texture2D>(imageLoadPath);
         asepriteJson.FrameSize = new Vector2(jsonData.frames[0].sourceSize.w,  jsonData.frames[0].sourceSize.h);
         asepriteJson.FilePath = path;
         

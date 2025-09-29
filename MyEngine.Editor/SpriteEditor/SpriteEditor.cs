@@ -53,7 +53,9 @@ public class SpriteEditor : Scene
 
     private float createModeDelayTimer = 0.0f;
     private bool isCreating = false;
-    private ResizeableRectangle currentCreateRectangle;
+    private ResizeableRectangle? currentCreateRectangle;
+    private ImGuiSaveDialog imguiSaveDialog;
+    private ImGuiFilePicker imguiFilePicker;
     
     public SpriteEditor()
     {
@@ -63,38 +65,36 @@ public class SpriteEditor : Scene
     {
         // ImGui Setup
         MainCamera = Instantiate("MainCamera").AddComponent<Camera>();
-        // MainCamera.GameObject.AddComponent<CameraController>();
         
+        // ImGui Setup
         imGuiManager = new ImGuiManager(this);
+        imGuiManager.ImGuiRenderer.AddFontFromFileTTF(
+            Helpers.GetContentPath(Content, "Engine/ImGuiFonts/fontawesome-webfont.ttf"),
+            13.0f,
+            IconFonts.FontAwesome4.IconMin,
+            IconFonts.FontAwesome4.IconMax);
         // string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/SpriteEditor.ini");
         // ImGui.LoadIniSettingsFromDisk(path);
-        
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
-        gameView = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
-        imGuiManager.AddComponent<FilePicker>();
-        SetResizableRectanglesActive(true);
-
-        gameView.ComponentExtension += OnGameViewComponentExtension;
-        imGuiManager.AddDrawCommand(ImGuiLayout);
-        // imGuiManager.AddComponent<ImGuiConsole>();
-        BackgroundColor = new Color(15, 15, 15);
         ImGuiColor.CherryTheme();
         
-        var fontIcon =
-            imGuiManager.ImGuiRenderer.AddFontFromFileTTF(
-                Helpers.GetContentPath(Content, "ImGuiFonts/fontawesome-webfont.ttf"),
-                13.0f,
-                IconFonts.FontAwesome4.IconMin,
-                IconFonts.FontAwesome4.IconMax);
+        gameView = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
+        gameView.ComponentExtension += OnGameViewComponentExtension;
+        
+        imguiFilePicker = imGuiManager.AddComponent<ImGuiFilePicker>();
+        imguiFilePicker.OnItemConfirmed += file => Console.WriteLine(file);
+        imGuiManager.AddDrawCommand(ImGuiLayout);
+        imguiSaveDialog = imGuiManager.AddComponent<ImGuiSaveDialog>();
+        // imGuiManager.AddComponent<ImGuiConsole>();
         animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>();
         
+        BackgroundColor = new Color(15, 15, 15);
+        SetResizableRectanglesActive(true);
         // Before Load Content
         base.Initialize();
         // After Load Content
-
-        // LoadAsepriteJson("Sprites/ninja.json");
     } 
     
     protected override void LoadContent()
@@ -230,7 +230,7 @@ public class SpriteEditor : Scene
 
     private void LoadAsepriteJson(string path)
     {
-        asepriteJson = AsepriteJson.FromFileRelative(Content, path);
+        asepriteJson = AsepriteJson.FromFile(Content, path);
         animations = asepriteJson.Animations.ToList().Select((pair => pair.Key)).ToArray();
         
         RemoveGameObject(sprite);
@@ -250,7 +250,7 @@ public class SpriteEditor : Scene
                 sprite = o;
             });
 
-        RemoveGameObject(currentCreateRectangle.GameObject);
+        RemoveGameObject(currentCreateRectangle?.GameObject);
         PrefabBuilder.Instatiate()
             .AddComponent<ResizeableRectangle>(r =>
             {
@@ -295,14 +295,64 @@ public class SpriteEditor : Scene
         if (mode == EditorMode.Create)
             SetResizableRectanglesActive(false);
     }
-
+    
     private bool show_test_window = false;
     private void ImGuiLayout()
     {
         if (ImGui.BeginMainMenuBar())
         {
-            if (ImGui.BeginMenu("Hello"))
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, new Num.Vector4(0.502f, 0.075f, 0.256f, 1.00f));
+            ImGui.BeginChild("TextBg", new Num.Vector2(130, ImGui.GetFrameHeight()), ImGuiChildFlags.NavFlattened);
+            ImGui.Text(" " + FontAwesome4.CameraRetro + " Sprite Editor");
+            ImGui.EndChild();
+            ImGui.PopStyleColor();
+            
+            ImGui.Separator();
+            if (ImGui.BeginMenu(FontAwesome4.File + " File"))
             {
+                if (ImGui.MenuItem(FontAwesome4.FileO + " New"))
+                {
+                    
+                }
+                ImGui.Separator();
+                if (ImGui.MenuItem(FontAwesome4.EnvelopeOpen + " Open"))
+                {
+                    imguiFilePicker.ConfirmButtonName = "Open";
+                    imguiFilePicker.OnlyAllowFolders = false;
+                    imguiFilePicker.AllowedExtensions = [".json"];
+                    imguiFilePicker.OnItemConfirmed = file =>
+                    {
+                        LoadAsepriteJson(file);
+                    };
+                    imguiFilePicker.OpenPopup("Open File");   
+                }
+                ImGui.Separator();
+                
+                if (ImGui.MenuItem(FontAwesome4.FloppyO + " Save"))
+                {
+                    imguiFilePicker.ConfirmButtonName = "Save";
+                    imguiFilePicker.OnlyAllowFolders = false;
+                    imguiFilePicker.AllowedExtensions = [".json"];
+                    imguiFilePicker.OnItemConfirmed = file =>
+                    {
+                        Console.WriteLine(file);
+                    };
+                    imguiFilePicker.OpenPopup("Save File");   
+                }
+                ImGui.Separator();
+                if (ImGui.MenuItem(FontAwesome4.Download + " Export"))
+                {
+                    imguiFilePicker.ConfirmButtonName = "Export";
+                    imguiFilePicker.OnlyAllowFolders = false;
+                    imguiFilePicker.AllowedExtensions = [".json"];
+                    imguiFilePicker.OnItemConfirmed = file =>
+                    {
+                        Console.WriteLine(file);
+                    };
+                    imguiFilePicker.OpenPopup("Export as");
+                }
+                ImGui.Separator();
+                
                 ImGui.EndMenu();
             }
             ImGui.EndMainMenuBar();
@@ -330,9 +380,9 @@ public class SpriteEditor : Scene
 
         }
         ImGui.End();
-
         
         ImGuiFramesWindow();
+        
     }
 
     private void ImGuiFramesWindow()

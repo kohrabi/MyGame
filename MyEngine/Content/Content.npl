@@ -36,6 +36,12 @@
                 "PremultiplyAlpha": "True",
                 "TextureFormat": "Compressed",
             }
-        }
+        },
+        "imGuiFonts":
+        {
+            "path": "Engine/ImGuiFonts/*.ttf",
+            "recursive": "True",
+            "action": "copy"
+        },
 	}
 }

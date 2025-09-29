@@ -34,7 +34,8 @@ public static class ImGuiColor
         style.Colors[(int)ImGuiCol.Header]                = new Vector4(0.455f, 0.198f, 0.301f, 0.76f);
         style.Colors[(int)ImGuiCol.HeaderHovered]         = new Vector4(0.455f, 0.198f, 0.301f, 0.86f);
         style.Colors[(int)ImGuiCol.HeaderActive]          = new Vector4(0.502f, 0.075f, 0.256f,  1.00f);
-        // style.Colors[ImGuiCol.Column]                = new Vector4(0.14f, 0.16f, 0.19f, 1.00f);
+        style.Colors[(int)ImGuiCol.ChildBg]                = new Vector4(0.13f, 0.14f, 0.17f, 1.00f);
+        style.Colors[(int)ImGuiCol.PopupBg]               = new Vector4(0.13f, 0.14f, 0.17f, 1.00f);
         // style.Colors[ImGuiCol.ColumnHovered]         = new Vector4(0.455f, 0.198f, 0.301f, 0.78f);
         // style.Colors[ImGuiCol.ColumnActive]          = new Vector4(0.455f, 0.198f, 0.301f, 1.00f);
         style.Colors[(int)ImGuiCol.ResizeGrip]            = new Vector4(0.47f, 0.77f, 0.83f, 0.04f);
