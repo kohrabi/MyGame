@@ -37,7 +37,8 @@ public class EditorScene1 : Scene
         MainCamera = Instantiate("MainCamera").AddComponent<Camera>();
         MainCamera.GameObject.AddComponent<CameraController>();
         
-        imGuiManager = new ImGuiManager(this);
+        Core.RegisterManager(new ImGuiManager());
+        imGuiManager = Core.GetGlobalManager<ImGuiManager>(); 
         string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/EditorScene1.ini");
         ImGui.LoadIniSettingsFromDisk(path);
         

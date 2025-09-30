@@ -188,6 +188,9 @@ namespace MyEngine
             SpriteBatch.GraphicsDevice.SetRenderTarget(null);
             
             DebugDraw.Instance.Draw(SpriteBatch);
+            
+            foreach (var manager in _managers)
+                manager.Draw(gameTime);
 
             //
             // // Call BeforeLayout first to set things up
@@ -201,10 +204,25 @@ namespace MyEngine
             
         }
 
-        public static void RegisterManager(GlobalManager manager)
+        public static GlobalManager RegisterOrGetManager(GlobalManager manager)
+        {
+            GlobalManager existManager = Instance._managers.Find((man) => man.GetType() == manager.GetType());
+            if (existManager != null)
+            {
+                DebugLog.Warning("Current Manager of type " + manager.GetType().Name + " already exists");
+                return existManager;
+            }
+            Instance._managers.Add(manager);
+            manager.Enabled = true;
+            return manager;
+        }
+
+        
+        public static GlobalManager RegisterManager(GlobalManager manager)
         {
             Instance._managers.Add(manager);
             manager.Enabled = true;
+            return manager;
         }
         
         

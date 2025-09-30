@@ -32,17 +32,11 @@ public class SpriteEditor : Scene
     }
     
     EditorMode mode = EditorMode.Edit;
-    
-    private Texture2D test;
 
-    private RenderTarget2D renderTarget;
     private ImGuiManager imGuiManager;
-    private int prevScrollValue = 0;
-    private GameObject sprite = null;
+    private CameraController cameraController;
 
-    private Vector2 prevCameraPosition = Vector2.Zero;
-    private bool dragging = false;
-    private Point downMousePosition = Point.Zero;
+    private GameObject sprite = null;
     private AsepriteJson? asepriteJson = null;
     private int selectedAnimation = 0;
     private string[] animations = [""];
@@ -50,8 +44,7 @@ public class SpriteEditor : Scene
     private List<ResizeableRectangle> framesRectangle = new List<ResizeableRectangle>();
     private nint texturePointer = IntPtr.Zero;
     string currentAnimation = "";
-    private int currentFrameSelected = 0;
-    private ImGuiViewportRender gameView;
+    private ImGuiViewportRender textureViewer;
 
     private float createModeDelayTimer = 0.0f;
     private bool isCreating = false;
@@ -60,33 +53,38 @@ public class SpriteEditor : Scene
     private ImGuiFilePicker imguiFilePicker;
     private GridComponent gridComponent;
     private Num.Vector2 gridCount = Num.Vector2.One;
-    private List<string> recentOpened = new List<string>();
+    private List<string> recentOpeneds = new List<string>();
     
     public SpriteEditor()
     {
+        Core.Instance.Exiting += OnInstanceOnExiting;
+        imGuiManager = (Core.RegisterOrGetManager(new ImGuiManager()) as ImGuiManager)!;
     }
+
 
     public override void Initialize()
     {
         // ImGui Setup
         MainCamera = Instantiate("MainCamera").AddComponent<Camera>();
+        cameraController = MainCamera.GameObject.AddComponent<CameraController>();
+        cameraController.UseDragControl = true;
         
         // ImGui Setup
-        imGuiManager = new ImGuiManager(this);
         imGuiManager.ImGuiRenderer.AddFontFromFileTTF(
             Helpers.GetContentPath(Content, "Engine/ImGuiFonts/fontawesome-webfont.ttf"),
             13.0f,
             IconFonts.FontAwesome4.IconMin,
             IconFonts.FontAwesome4.IconMax);
-        // string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/SpriteEditor.ini");
-        // ImGui.LoadIniSettingsFromDisk(path);
+        string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/SpriteEditor.ini");
+        ImGui.LoadIniSettingsFromDisk(path);
+        
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         ImGuiColor.CherryTheme();
         
-        gameView = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
-        gameView.ComponentExtension += OnGameViewComponentExtension;
+        textureViewer = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
+        textureViewer.ComponentExtension += OnGameViewComponentExtension;
         
         imguiFilePicker = imGuiManager.AddComponent<ImGuiFilePicker>();
         imguiFilePicker.OnItemConfirmed += file => Console.WriteLine(file);
@@ -104,22 +102,18 @@ public class SpriteEditor : Scene
     
     protected override void LoadContent()
     {
-        test = Content.Load<Texture2D>("Sprites/test");
     }
 
-    private void SetResizableRectanglesActive(bool active)
+    public override void UnloadContent()
     {
-        foreach (var frameRectangle in framesRectangle)
-        {
-            frameRectangle.IsResizeable = active;
-        }
+        base.UnloadContent();
+        
+        Core.Instance.Exiting -= OnInstanceOnExiting;
     }
 
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
-        
-        imGuiManager.Update(gameTime);
 
         for (int i = 0; i < framesRectangle.Count; i++) 
         {
@@ -131,36 +125,14 @@ public class SpriteEditor : Scene
         
         var mouse = Mouse.GetState();
         int scrollValue = mouse.ScrollWheelValue;
-        if (gameView.IsWindowFocused && asepriteJson != null)
+        cameraController.Active = false;
+        if (textureViewer.IsWindowFocused && asepriteJson != null)
         {
-            // Zoom in
-            if (Math.Abs(scrollValue - prevScrollValue) > 0)
-            {
-                MainCamera.Zoom += -(scrollValue - prevScrollValue) / 1000.0f * MainCamera.Zoom;
-            }
-
-            // Move Camera
-            if (mouse.RightButton == ButtonState.Pressed)
-            {
-                if (!dragging)
-                {
-                    downMousePosition = mouse.Position;
-                    dragging = true;
-                    prevCameraPosition = MainCamera.Transform.GlobalPosition;
-                }
-                else
-                {
-                    MainCamera.Transform.GlobalPosition =
-                        prevCameraPosition - (mouse.Position - downMousePosition).ToVector2();
-                }
-            }
-            else
-            {
-                dragging = false;
-                downMousePosition = Point.Zero;
-                prevCameraPosition = Vector2.Zero;
-            }
-
+            cameraController.Active = true;
+            cameraController.ClampBound = asepriteJson.Texture.Bounds;
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                MainCamera.CenterPosition(sprite.Transform.GlobalPosition);
+            
             if (createModeDelayTimer > 0)
                 createModeDelayTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             else
@@ -196,43 +168,23 @@ public class SpriteEditor : Scene
                     }
                 }
             }
-
-            // Clamp View
-            RectangleF cameraBound = new RectangleF(
-                MainCamera.Transform.GlobalPosition.X, 
-                MainCamera.Transform.GlobalPosition.Y, 
-                MainCamera.RenderTarget2D.Width, 
-                MainCamera.RenderTarget2D.Height);
-            cameraBound.Width = (int)(cameraBound.Width * MainCamera.Zoom);
-            cameraBound.Height = (int)(cameraBound.Height * MainCamera.Zoom);
-            Rectangle textureBound = asepriteJson.Texture.Bounds;
-            textureBound.Inflate(textureBound.Width * 0.2f, textureBound.Height * 0.2f);
             
-            if (textureBound.Left < textureBound.Right - cameraBound.Width)
-                cameraBound.X = Math.Clamp(cameraBound.X, textureBound.Left, textureBound.Right - cameraBound.Width);
-            else
-                cameraBound.X = textureBound.Left - (cameraBound.Width - textureBound.Width) / 2.0f;
-            
-            if (textureBound.Top < textureBound.Bottom - cameraBound.Height)
-                cameraBound.Y = Math.Clamp(cameraBound.Y, textureBound.Top, textureBound.Bottom - cameraBound.Height);
-            else
-                cameraBound.Y = textureBound.Top - (cameraBound.Height - textureBound.Height) / 2.0f;
-            MainCamera.Transform.GlobalPosition = cameraBound.Location;
-            
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
-                MainCamera.CenterPosition(sprite.Transform.GlobalPosition);
         }
-        prevScrollValue = scrollValue;
         
     }
-
-    public override void Draw(GameTime gameTime)
+    
+    private void SetResizableRectanglesActive(bool active)
     {
-        base.Draw(gameTime);
-        
-        imGuiManager.Draw(gameTime);
+        foreach (var frameRectangle in framesRectangle)
+        {
+            frameRectangle.IsResizeable = active;
+        }
     }
-
+    
+    private void OnInstanceOnExiting(object? sender, ExitingEventArgs args)
+    {
+    }
+    
     private void InitializeAnimations()
     {
         animations = asepriteJson.Animations.ToList().Select((pair => pair.Key)).ToArray();
@@ -310,7 +262,6 @@ public class SpriteEditor : Scene
             SetResizableRectanglesActive(false);
     }
     
-    private bool show_test_window = false;
     private void ImGuiLayout()
     {
         if (ImGui.BeginMainMenuBar())
@@ -324,12 +275,12 @@ public class SpriteEditor : Scene
             ImGui.Separator();
             if (ImGui.BeginMenu(FontAwesome4.File + " File"))
             {
-                if (ImGui.MenuItem(FontAwesome4.FileO + " New"))
+                if (ImGui.MenuItem(FontAwesome4.FileO + " New", "Ctrl + N"))
                 {
                     
                 }
                 ImGui.Separator();
-                if (ImGui.MenuItem(FontAwesome4.EnvelopeOpen + " Open"))
+                if (ImGui.MenuItem(FontAwesome4.FolderOpen + " Open", "Ctrl + O"))
                 {
                     imguiFilePicker.ConfirmButtonName = "Open";
                     imguiFilePicker.OnlyAllowFolders = false;
@@ -346,7 +297,28 @@ public class SpriteEditor : Scene
                 }
                 ImGui.Separator();
                 
-                if (ImGui.MenuItem(FontAwesome4.FloppyO + " Save"))
+                if (ImGui.BeginMenu(FontAwesome4.FolderOpenO + " Recent Open"))
+                {
+                    if (recentOpeneds.Count > 0)
+                    {
+                        ImGui.MenuItem("None");
+                    }
+                    else
+                    {
+                        foreach (var recentOpen in recentOpeneds)
+                        {
+                            if (ImGui.MenuItem(Path.GetFileName(recentOpen)))
+                            {
+                                
+                            }
+                        }
+                    }
+                    ImGui.EndMenu();
+                }
+
+                
+                ImGui.Separator();
+                if (ImGui.MenuItem(FontAwesome4.FloppyO + " Save", "Ctrl + S"))
                 {
                     imguiFilePicker.ConfirmButtonName = "Save";
                     imguiFilePicker.OnlyAllowFolders = false;
@@ -399,7 +371,6 @@ public class SpriteEditor : Scene
             ImGui.EndMainMenuBar();
         }
 
-        ImGui.ShowDemoWindow(ref show_test_window);
         if (ImGui.Begin("Settings"))
         {
             
@@ -459,8 +430,23 @@ public class SpriteEditor : Scene
         ImGui.End();
         
         ImGuiFramesWindow();
+
+        if (!testPopup)
+        {
+            testPopup = true;
+        }
+        ImGui.OpenPopup("Hello");
         
+        if (ImGui.Begin("Hello",
+                ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoResize |
+                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.Popup))
+        {
+            ImGui.TextWrapped("Helloooooo");
+        }
+        ImGui.End();
     }
+
+    private bool testPopup = false;
 
     private void ImGuiFramesWindow()
     {
@@ -487,7 +473,6 @@ public class SpriteEditor : Scene
                     Num.Vector2 prevCursorPos = ImGui.GetCursorPos();
                     if (ImGui.Selectable("Frame " + i, animationViewer.CurrentFrame == i, ImGuiSelectableFlags.None, selectableSize))
                     {
-                        currentFrameSelected = i;
                         animationViewer.SetCurrentFrame(i);
                     }
                     ImGui.SameLine();

@@ -41,7 +41,6 @@ public class ResizeableRectangle : Component
     public void Initialize(Vector2 position, Vector2 size)
     {
         Transform.GlobalPosition = position;
-        Console.WriteLine(Transform.GlobalPosition);
         Size = size;
         rectangle.Location = Transform.GlobalPosition;
         rectangle.Offset(-Size * Origin);
