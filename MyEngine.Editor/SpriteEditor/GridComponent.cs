@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.Utils;
@@ -14,7 +15,7 @@ public class GridComponent : Component
     public void Initialize(Vector2 size, Vector2 gridSize, Color color)
     {
         Size = size;
-        GridSize = gridSize;
+        GridSize = Vector2.Max(gridSize, Vector2.One * 16.0f);
         Color = color;
     }
 
@@ -23,9 +24,9 @@ public class GridComponent : Component
         base.Draw(spriteBatch, gameTime);
 
         bool filled = true;
-        for (int j = 0; j < Size.Y / GridSize.Y; j++)
+        for (int j = 0; j < Size.Y / Math.Max(GridSize.Y, 1.0f); j++)
         {
-            for (int i = 0; i < Size.X / GridSize.X; i++)
+            for (int i = 0; i < Size.X / Math.Max(GridSize.X, 1.0f); i++)
             {
                 if (filled)
                 {

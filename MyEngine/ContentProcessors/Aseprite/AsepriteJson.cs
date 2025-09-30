@@ -12,11 +12,25 @@ namespace MyEngine.ContentProcessors.Aseprite;
 
 public class AsepriteJson
 {
-    public string FilePath { get; private set; }
-    public Texture2D Texture { get; private set; }
-    public Vector2 FrameSize { get; private set; }
-    public Dictionary<string, List<AnimationFrame> > Animations { get; private set; } = new();
+    public string FilePath;
+    public Texture2D Texture;
+    public string TextureFilePath { get; set; }
+    public Vector2 FrameSize { get; set; }
+    public Dictionary<string, List<AnimationFrame> > Animations { get; set; } = new();
 
+    // Make sure TextureFilePath already exists
+    public void LoadTexture()
+    {
+        if (Path.GetExtension(TextureFilePath) == ".png")
+            Texture = Texture2D.FromFile(Core.GraphicsDevice, TextureFilePath);
+        else
+        {
+            string xnb = Path.GetRelativePath(Path.GetFullPath(Core.Content.RootDirectory), TextureFilePath);
+            xnb = Path.Combine(Path.GetDirectoryName(xnb), Path.GetFileNameWithoutExtension(xnb));
+            Texture = Core.Content.Load<Texture2D>(xnb);
+        }
+    }
+    
     public static AsepriteJson FromFileRelative(ContentManager content, string path)
     {
         string filePath = Path.Combine(content.RootDirectory + "/" + path);
@@ -35,19 +49,21 @@ public class AsepriteJson
             throw new ArgumentOutOfRangeException("Yoo there can't be zero frames");
 
         AsepriteJson asepriteJson = new AsepriteJson();
-        string imageLoadPath = Path.GetRelativePath(content.RootDirectory, Path.GetDirectoryName(path) + "/" +
-                                                                       Path.GetFileNameWithoutExtension(jsonData.meta.image));
+        string imageLoadPath = Path.GetRelativePath(content.RootDirectory, Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(jsonData.meta.image));
         string imagePathXnb = Path.GetFullPath(Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(jsonData.meta.image) + ".xnb");
         string imagePathJson = Path.GetFullPath(Path.GetDirectoryName(path) + "/" + jsonData.meta.image);
         if (!File.Exists(imagePathXnb))
         {
             if (!File.Exists(imagePathJson))
                 throw new ArgumentException("Cannot load because image file " + imagePathXnb + " doesn't exists in original format nor .xnb");
-            else
-                asepriteJson.Texture = Texture2D.FromFile(Core.GraphicsDevice, imagePathJson);
+            asepriteJson.Texture = Texture2D.FromFile(Core.GraphicsDevice, imagePathJson);
+            asepriteJson.TextureFilePath = Path.GetFullPath(imagePathJson);
         }
         else
+        {
             asepriteJson.Texture = content.Load<Texture2D>(imageLoadPath);
+            asepriteJson.TextureFilePath = Path.GetFullPath(imagePathXnb);
+        }
         asepriteJson.FrameSize = new Vector2(jsonData.frames[0].sourceSize.w,  jsonData.frames[0].sourceSize.h);
         asepriteJson.FilePath = path;
         

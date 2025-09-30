@@ -40,6 +40,7 @@ public class ImGuiFilePicker : ImGuiComponent
 	public List<string> AllowedExtensions;
 	public bool HideHiddenFolders = true;
 	public bool OnlyAllowFolders = true;
+	public bool AllowUncreatedFile = true;
 	public bool DontAllowTraverselBeyondRootFolder = false;
 	
 	private int sortIndex = 2;
@@ -75,6 +76,7 @@ public class ImGuiFilePicker : ImGuiComponent
 		}
 		PopupName = popupName;
 		open = true;
+		GetFiles();
 	}
 	
 	private bool open = false;
@@ -284,6 +286,19 @@ public class ImGuiFilePicker : ImGuiComponent
 			ImGui.PushStyleColor(ImGuiCol.FrameBg, new Num.Vector4(0.200f, 0.220f, 0.270f, 1.00f)); // RGBA
 			ImGui.InputText("Current File ", ref inputFileName, 256);
 			ImGui.PopStyleColor();
+			if (AllowedExtensions != null && AllowedExtensions.Count > 0)
+			{
+				string allowedExtensions = "";
+				bool first = true;
+				foreach (var extension in AllowedExtensions)
+				{
+					if (!first)
+						allowedExtensions += ", ";
+					allowedExtensions += $"{extension}";
+					first = false;
+				}
+				ImGui.Text("Allowed Extensions: " + allowedExtensions);
+			}
 
 			if (ImGui.Button("Cancel"))
 			{
@@ -300,15 +315,15 @@ public class ImGuiFilePicker : ImGuiComponent
 					ImGui.CloseCurrentPopup();
 				}
 			}
-			else if (SelectedFile != null)
+			else if (!string.IsNullOrEmpty(SelectedFile))
 			{
 				ImGui.SameLine();
 				if (ImGui.Button(ConfirmButtonName))
 				{
-					if (Path.GetFileName(SelectedFile) == inputFileName)
-						OnItemConfirmed.Invoke(SelectedFile);
-					else
+					if (Path.GetFileName(SelectedFile) != inputFileName && AllowUncreatedFile)
 						OnItemConfirmed.Invoke(Path.GetDirectoryName(SelectedFile) + "\\" + inputFileName);
+					else if (Path.GetFileName(SelectedFile) == inputFileName)
+						OnItemConfirmed.Invoke(SelectedFile);
 					ImGui.CloseCurrentPopup();
 				}
 			}

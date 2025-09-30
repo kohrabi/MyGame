@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using IconFonts;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
@@ -16,6 +17,7 @@ using MyEngine.GameObjects;
 using MyEngine.Managers;
 using MyEngine.Utils;
 using MyEngine.Utils.MyMath;
+using MyEngine.Utils.Serialization;
 using Num = System.Numerics;
 
 namespace MyEngine.Editor.SpriteEditor;
@@ -56,6 +58,9 @@ public class SpriteEditor : Scene
     private ResizeableRectangle? currentCreateRectangle;
     private ImGuiSaveDialog imguiSaveDialog;
     private ImGuiFilePicker imguiFilePicker;
+    private GridComponent gridComponent;
+    private Num.Vector2 gridCount = Num.Vector2.One;
+    private List<string> recentOpened = new List<string>();
     
     public SpriteEditor()
     {
@@ -228,9 +233,8 @@ public class SpriteEditor : Scene
         imGuiManager.Draw(gameTime);
     }
 
-    private void LoadAsepriteJson(string path)
+    private void InitializeAnimations()
     {
-        asepriteJson = AsepriteJson.FromFile(Content, path);
         animations = asepriteJson.Animations.ToList().Select((pair => pair.Key)).ToArray();
         
         RemoveGameObject(sprite);
@@ -242,6 +246,7 @@ public class SpriteEditor : Scene
             })
             .AddComponent<GridComponent>((g) =>
             {
+                gridComponent = g;
                 g.Initialize(asepriteJson.Texture.Bounds.Size.ToVector2(), asepriteJson.FrameSize, Color.Gray);
             })
             .GetGameObject(o =>
@@ -261,7 +266,16 @@ public class SpriteEditor : Scene
         imGuiManager.ImGuiRenderer.UnbindTexture(texturePointer);
         texturePointer = imGuiManager.ImGuiRenderer.BindTexture(asepriteJson.Texture);
         
-        animationViewer.SetAnimation(asepriteJson, "Idle");
+        gridComponent.GridSize = Vector2.Max(gridComponent.GridSize, Num.Vector2.One);
+        gridCount = (gridComponent.Size / gridComponent.GridSize).ToNumerics();
+        
+        animationViewer.SetAnimation(asepriteJson, asepriteJson.Animations.Keys.First());
+    }
+    
+    private void LoadAsepriteJson(string path)
+    {
+        asepriteJson = AsepriteJson.FromFile(Content, path);
+        InitializeAnimations();
     }
 
     private void ChooseAnimation(string name)
@@ -319,10 +333,14 @@ public class SpriteEditor : Scene
                 {
                     imguiFilePicker.ConfirmButtonName = "Open";
                     imguiFilePicker.OnlyAllowFolders = false;
-                    imguiFilePicker.AllowedExtensions = [".json"];
+                    imguiFilePicker.AllowUncreatedFile = false;
+                    imguiFilePicker.AllowedExtensions = [".maf"];
                     imguiFilePicker.OnItemConfirmed = file =>
                     {
-                        LoadAsepriteJson(file);
+                        AsepriteJson temp = JsonSerializer.Deserialize<AsepriteJson>(File.ReadAllText(file), SerializeSettings.Default)!;
+                        temp.LoadTexture();
+                        asepriteJson = temp;
+                        InitializeAnimations();
                     };
                     imguiFilePicker.OpenPopup("Open File");   
                 }
@@ -332,12 +350,35 @@ public class SpriteEditor : Scene
                 {
                     imguiFilePicker.ConfirmButtonName = "Save";
                     imguiFilePicker.OnlyAllowFolders = false;
-                    imguiFilePicker.AllowedExtensions = [".json"];
+                    imguiFilePicker.AllowedExtensions = [".maf"];
                     imguiFilePicker.OnItemConfirmed = file =>
                     {
-                        Console.WriteLine(file);
+                        string jsonString = JsonSerializer.Serialize(asepriteJson, SerializeSettings.Default);
+                        {
+                            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileName(file));
+                            File.WriteAllText(tempFile, jsonString);
+                            File.Copy(tempFile, file, true);
+                            File.Delete(tempFile);
+                        }
+                        // Console.WriteLine(jsonString);
                     };
                     imguiFilePicker.OpenPopup("Save File");   
+                }
+                ImGui.Separator();
+                if (ImGui.BeginMenu(FontAwesome4.LevelDown + " Import"))
+                {
+                    if (ImGui.MenuItem("AsepriteJson"))
+                    {
+                        imguiFilePicker.ConfirmButtonName = "Import";
+                        imguiFilePicker.OnlyAllowFolders = false;
+                        imguiFilePicker.AllowedExtensions = [".json"];
+                        imguiFilePicker.OnItemConfirmed = file =>
+                        {
+                            LoadAsepriteJson(file);
+                        };
+                        imguiFilePicker.OpenPopup("Import File");   
+                    }
+                    ImGui.EndMenu();
                 }
                 ImGui.Separator();
                 if (ImGui.MenuItem(FontAwesome4.Download + " Export"))
@@ -367,17 +408,53 @@ public class SpriteEditor : Scene
             
             ImGui.NewLine();
             ImGui.Text("Current File: " + asepriteJson?.FilePath); 
-            // ImGui.SameLine();
-            ImGui.Button("Change File");
             ImGui.NewLine();
-
             ImGui.Separator();
             ImGui.NewLine();
             if (ImGui.ListBox("Animations", ref selectedAnimation, animations, animations.Length))
             {
                 ChooseAnimation(animations[selectedAnimation]);                        
             }
-
+            ImGui.NewLine();
+            ImGui.Separator();
+            ImGui.NewLine();
+            ImGui.Text("Current Texture File: " + asepriteJson?.TextureFilePath);
+            if (ImGui.Button("Change File##Texture"))
+            {
+                imguiFilePicker.ConfirmButtonName = "Open";
+                imguiFilePicker.OnlyAllowFolders = false;
+                imguiFilePicker.AllowedExtensions = [".xnb", ".png"];
+                imguiFilePicker.OnItemConfirmed = file =>
+                {
+                    if (asepriteJson != null)
+                    {
+                        asepriteJson.TextureFilePath = file;
+                        asepriteJson.LoadTexture();
+                    }
+                };
+                imguiFilePicker.OpenPopup("Open File");
+            }
+            ImGui.NewLine();
+            ImGui.Separator();
+            ImGui.NewLine();
+            Num.Vector2 frameSize = asepriteJson?.FrameSize.ToNumerics() ?? Num.Vector2.One;
+            if (ImGui.DragFloat2("Frame Size", ref frameSize, 1.0f, 1.0f, 500f))
+            {
+                if (asepriteJson != null)
+                {
+                    gridComponent.GridSize = Vector2.Max(frameSize, Num.Vector2.One);
+                    gridCount = (gridComponent.Size / gridComponent.GridSize).ToNumerics();
+                    asepriteJson.FrameSize = gridComponent.GridSize;
+                }
+            }
+            if (ImGui.DragFloat2("Grid Count", ref gridCount, 1.0f, 1.0f, 500f))
+            {
+                if (asepriteJson != null)
+                {
+                    gridComponent.GridSize = gridComponent.Size / gridCount;
+                    asepriteJson.FrameSize = gridComponent.GridSize;
+                }
+            }
         }
         ImGui.End();
         
