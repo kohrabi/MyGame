@@ -83,9 +83,12 @@ public class ImGuiLogPopup : ImGuiObject
             Num.Vector2 pos = new Num.Vector2(displaySize.X - windowSize.X - 20, 10); // 20px from right, 60px from bottom
             if (nextYPosition > 0)
                 pos.Y += nextYPosition;
-            
+
             if (item.PrevPosition == Num.Vector2.Zero)
+            {
+                pos.X = displaySize.X;
                 _items[i].PrevPosition = pos;
+            }
             
             const float LeaveTime = 0.5f;
             if (item.TimeLeft <= LeaveTime)
