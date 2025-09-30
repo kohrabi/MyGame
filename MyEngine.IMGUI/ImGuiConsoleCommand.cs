@@ -6,8 +6,7 @@ namespace MyEngine.Utils.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
 // Only for static Functions
-// You will need to pass in the command name, type of the class, and the method name because attribute is just metadata
-// Return a string inorder to
+// You will need to pass in the command name
 public class ImGuiConsoleCommand : Attribute
 {
     const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;

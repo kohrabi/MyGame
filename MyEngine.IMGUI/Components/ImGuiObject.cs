@@ -1,11 +1,10 @@
-﻿using ImGuiNET;
-using ImGuiNET.Renderer;
+﻿using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Managers;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
-public abstract class ImGuiComponent
+public abstract class ImGuiObject
 {
     protected readonly int _id = 0;
     protected Scene _scene;
@@ -14,7 +13,7 @@ public abstract class ImGuiComponent
     protected Scene Scene => _scene;
     protected ImGuiManager ImGuiManager => _imGuiManager;
     protected ImGuiRenderer ImGuiRenderer => ImGuiManager.ImGuiRenderer;
-    public ImGuiComponent(ImGuiManager imGuiManager, Scene scene, int id)
+    public ImGuiObject(ImGuiManager imGuiManager, Scene scene, int id)
     {
         _imGuiManager = imGuiManager;
         _scene = scene;

@@ -29,6 +29,7 @@
         <PackageReference Include="Nopipeline.Task" Version="2.3.0" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\MyEngine.IMGUI\MyEngine.IMGUI.csproj" />
       <ProjectReference Include="..\MyEngine\MyEngine.csproj" />
     </ItemGroup>
     <ItemGroup>

@@ -5,13 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using IconFonts;
-using ImGuiNET.Renderer;
 using MyEngine.Managers;
 using Num = System.Numerics;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
-public class ImGuiFilePicker : ImGuiComponent
+public class ImGuiFilePicker : ImGuiObject
 {
 	struct PickableFile
 	{

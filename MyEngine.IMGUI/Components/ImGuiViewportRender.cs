@@ -1,6 +1,5 @@
 ﻿using System;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
@@ -8,9 +7,9 @@ using MyEngine.Graphics;
 using MyEngine.Managers;
 using Num =  System.Numerics;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
-public class ImGuiViewportRender : ImGuiComponent
+public class ImGuiViewportRender : ImGuiObject
 {
     readonly Vector2 DEFAULT_RENDER_TARGET_SIZE = new Vector2(1280, 720);
     readonly Vector2 PADDING = new Vector2(-20, -30);

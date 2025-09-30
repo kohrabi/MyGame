@@ -1,13 +1,12 @@
 ﻿using System;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Managers;
 using Num = System.Numerics;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
-public class ImGuiSaveDialog : ImGuiComponent
+public class ImGuiSaveDialog : ImGuiObject
 {
     public string FileName;
     public Action PopupSaveFile;

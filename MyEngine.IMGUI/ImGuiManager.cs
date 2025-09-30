@@ -6,7 +6,7 @@ using ImGuiNET;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Components;
-using MyEngine.Debug.IMGUIComponents;
+using MyEngine.IMGUI.Components;
 using MyEngine.Utils;
 
 namespace MyEngine.Managers;
@@ -14,7 +14,7 @@ namespace MyEngine.Managers;
 public class ImGuiManager : GlobalManager
 {
     private ImGuiRenderer  _imGuiRenderer;
-    private List<ImGuiComponent> _components;
+    private List<ImGuiObject> _components;
     private List<Action> _drawCommands;
     private int _idCounter = 0;
     public bool EnableDocking = true;
@@ -27,7 +27,7 @@ public class ImGuiManager : GlobalManager
     
     public ImGuiManager()
     {
-        _components = new List<ImGuiComponent>();
+        _components = new List<ImGuiObject>();
         _drawCommands = new List<Action>();
         _imGuiRenderer = new ImGuiRenderer(Core.Instance);
         _imGuiRenderer.RebuildFontAtlas();
@@ -86,7 +86,7 @@ public class ImGuiManager : GlobalManager
     }
     
     
-    public T AddComponent<T>(params object[] varargs) where T : ImGuiComponent
+    public T AddComponent<T>(params object[] varargs) where T : ImGuiObject
     {
         T? returnComponent = (T?)_components.Find(c => c is T);
         if (returnComponent != null)
@@ -102,7 +102,7 @@ public class ImGuiManager : GlobalManager
         return component;
     }
 
-    public void RemoveComponent<T>() where T : ImGuiComponent
+    public void RemoveComponent<T>() where T : ImGuiObject
     {
         var removeComponent = _components.FirstOrDefault(c => c.GetType() == typeof(T));
         if (removeComponent != null)

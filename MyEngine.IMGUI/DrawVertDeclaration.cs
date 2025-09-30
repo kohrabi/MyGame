@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 
 namespace ImGuiNET.Renderer
 {

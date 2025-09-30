@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using IconFonts;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Managers;
 using MyEngine.Utils.Tween;
-using Color = System.Drawing.Color;
 using Num = System.Numerics;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
 public enum ImGuiLogPopupType
 {
+    None,
     Info,
     Warning,
     Error,
@@ -33,7 +32,7 @@ public class ImGuiLogPopupItem
     }
 }
 
-public class ImGuiLogPopup : ImGuiComponent
+public class ImGuiLogPopup : ImGuiObject
 {
     private List<ImGuiLogPopupItem> _items = new List<ImGuiLogPopupItem>();
     private Queue<int> _indexQueue = new Queue<int>();
@@ -74,7 +73,7 @@ public class ImGuiLogPopup : ImGuiComponent
             Num.Vector2 pos = new Num.Vector2(displaySize.X - windowSize.X - 20, 10); // 20px from right, 60px from bottom
             if (nextYPosition > 0)
                 pos.Y += nextYPosition + 0.0f;
-            const float LeaveTime = 1.0f;
+            const float LeaveTime = 0.5f;
             if (item.TimeLeft <= LeaveTime)
                 pos.X += MathHelper.Lerp(0f, windowSize.X + 20, Easings.EaseOutExpo(1.0f - item.TimeLeft / LeaveTime));
             
@@ -90,9 +89,13 @@ public class ImGuiLogPopup : ImGuiComponent
                 
                 switch (item.Type)
                 {
+                    case ImGuiLogPopupType.None:
+                        color = Color.White;
+                        symbol = FontAwesome4.Exclamation;
+                        break;
                     case ImGuiLogPopupType.Info: 
-                        color = Color.AliceBlue;
-                        symbol = FontAwesome4.Exclamation; 
+                        color = Color.SkyBlue;
+                        symbol = FontAwesome4.Info; 
                         break;
                     case ImGuiLogPopupType.Warning: 
                         color = Color.Yellow;
@@ -108,7 +111,7 @@ public class ImGuiLogPopup : ImGuiComponent
                 ImGui.PushFont(ImGuiManager.BigIconFont);
                 Num.Vector2 textSize = ImGui.CalcTextSize(symbol);
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (32.0f - textSize.X) / 2.0f);
-                ImGui.TextColored(new Num.Vector4(color.R, color.G, color.B, color.A), symbol);
+                ImGui.TextColored(color.ToVector4().ToNumerics(), symbol);
                 ImGui.PopFont();
                 
                 ImGui.SameLine(0, 0);

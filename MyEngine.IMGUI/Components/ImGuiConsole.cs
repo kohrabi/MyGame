@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Managers;
+using MyEngine.Utils;
 using MyEngine.Utils.Attributes;
 using Num = System.Numerics;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
-public class ImGuiConsole : ImGuiComponent
+public class ImGuiConsole : ImGuiObject
 {
     private const int MAX_BUFFER_SIZE = 256;
     private const int MAX_HISTORY_SIZE = 16;
@@ -29,10 +29,25 @@ public class ImGuiConsole : ImGuiComponent
     
     public ImGuiConsole(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id)
     {
-        
+        if (DebugLog.Instance != null)
+        {
+            DebugLog.Instance.LogAction += OnLogAction;
+        }
     }
 
+    ~ImGuiConsole()
+    {
+        if (DebugLog.Instance != null)
+        {
+            DebugLog.Instance.LogAction -= OnLogAction;
+        }
+    }
 
+    private void OnLogAction(DebugLogType logType, string message)
+    {
+        AddLog(message);           
+    }
+    
     public override void Update(GameTime gameTime) { }
 
     private void ClearLog()

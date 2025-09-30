@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.ContentProcessors.Aseprite;
-using MyEngine.Debug.IMGUIComponents;
+using MyEngine.IMGUI.Components;
 using MyEngine.Managers;
 using Num = System.Numerics;
 
 namespace MyEngine.Editor.SpriteEditor;
 
-public class ImGuiSpriteAnimationViewer : ImGuiComponent
+public class ImGuiSpriteAnimationViewer : ImGuiObject
 {
     
     private Dictionary<string, List<AnimationFrame>> _animations = new Dictionary<string, List<AnimationFrame>>();

@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.GameObjects;
-using MyEngine.Debug.IMGUIComponents;
+using MyEngine.IMGUI.Components;
 using MyEngine.Managers;
 using MyEngine.Utils;
 using MyEngine.Utils.MyMath;
@@ -29,6 +28,7 @@ public class EditorScene1 : Scene
     
     public EditorScene1()
     {
+        imGuiManager = (ImGuiManager)Core.RegisterOrGetManager(new ImGuiManager()); 
     }
 
     public override void Initialize()
@@ -37,15 +37,13 @@ public class EditorScene1 : Scene
         MainCamera = Instantiate("MainCamera").AddComponent<Camera>();
         MainCamera.GameObject.AddComponent<CameraController>();
         
-        Core.RegisterManager(new ImGuiManager());
-        imGuiManager = Core.GetGlobalManager<ImGuiManager>(); 
         string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/EditorScene1.ini");
         ImGui.LoadIniSettingsFromDisk(path);
         
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
-        imGuiManager.AddComponent<ImGuiViewportRender>();
+        imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
         imGuiManager.AddDrawCommand(ImGuiLayout);
         var gameObjectWindow = imGuiManager.AddComponent<ImGuiGameObjectsWindow>();
         imGuiManager.AddComponent<ImGuiConsole>();
@@ -121,14 +119,12 @@ public class EditorScene1 : Scene
         // a.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
         // b.Transform.Rotation += MathHelper.ToRadians((float)(15.0f * gameTime.ElapsedGameTime.TotalSeconds));
         
-        imGuiManager.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
         
-        imGuiManager.Draw(gameTime);
     }
 
     private void ImGuiLayout()
@@ -142,7 +138,6 @@ public class EditorScene1 : Scene
             ImGui.EndMainMenuBar();
         }
         
-        ImGui.DockSpaceOverViewport(ImGui.GetMainViewport().ID);
         ImGui.ShowDemoWindow(ref show_test_window);
 
     }

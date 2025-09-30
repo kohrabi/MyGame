@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using MyEngine.Debug.IMGUIComponents;
+using MyEngine.IMGUI.Components;
 using MyEngine.Utils.Attributes;
 
 namespace MyEngine.Utils;

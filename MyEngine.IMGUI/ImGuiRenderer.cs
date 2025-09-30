@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Runtime.InteropServices;
-using ImGuiNET;
 
 namespace ImGuiNET.Renderer
 {

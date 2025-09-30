@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using ImGuiNET;
-using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
@@ -11,9 +10,9 @@ using MyEngine.Utils;
 using MyEngine.Utils.Attributes;
 using Num =  System.Numerics;
 
-namespace MyEngine.Debug.IMGUIComponents;
+namespace MyEngine.IMGUI.Components;
 
-public class ImGuiGameObjectsWindow : ImGuiComponent
+public class ImGuiGameObjectsWindow : ImGuiObject
 {
     private GameObject _selectedGameObject;
     public GameObject SelectedGameObject => _selectedGameObject;

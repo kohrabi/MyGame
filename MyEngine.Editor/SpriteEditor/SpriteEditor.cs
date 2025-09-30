@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MyEngine.Components;
 using MyEngine.ContentProcessors.Aseprite;
-using MyEngine.Debug.IMGUIComponents;
+using MyEngine.IMGUI.Components;
 using MyEngine.GameObjects;
 using MyEngine.Managers;
 using MyEngine.Utils;

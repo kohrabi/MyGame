@@ -10,7 +10,6 @@
         <PackageReference Include="Nopipeline.Task" Version="2.3.0" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\ImGuiRenderer\ImGuiRenderer.csproj" />
       <ProjectReference Include="..\MyEngine\MyEngine.csproj" />
     </ItemGroup>
     <ItemGroup>
