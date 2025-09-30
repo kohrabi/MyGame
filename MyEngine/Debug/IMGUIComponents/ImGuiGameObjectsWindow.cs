@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.GameObjects;
+using MyEngine.Managers;
 using MyEngine.Utils;
 using MyEngine.Utils.Attributes;
 using Num =  System.Numerics;
@@ -21,8 +22,8 @@ public class ImGuiGameObjectsWindow : ImGuiComponent
     
     public event SelectedGameObjectChange OnSelectedGameObjectChanged;
     
-    public ImGuiGameObjectsWindow(ImGuiRenderer imGuiRenderer, Scene scene, int id)
-        : base(imGuiRenderer, scene, id)
+    public ImGuiGameObjectsWindow(ImGuiManager manager, Scene scene, int id)
+        : base(manager, scene, id)
     {
     }
 

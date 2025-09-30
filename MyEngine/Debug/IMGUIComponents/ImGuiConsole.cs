@@ -6,6 +6,7 @@ using System.Reflection;
 using ImGuiNET;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
+using MyEngine.Managers;
 using MyEngine.Utils.Attributes;
 using Num = System.Numerics;
 
@@ -26,7 +27,7 @@ public class ImGuiConsole : ImGuiComponent
     private bool _scrollToBottom = false;
     
     
-    public ImGuiConsole(ImGuiRenderer renderer, Scene scene, int id) : base(renderer, scene, id)
+    public ImGuiConsole(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id)
     {
         
     }

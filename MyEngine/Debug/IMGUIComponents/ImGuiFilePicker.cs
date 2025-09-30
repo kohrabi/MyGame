@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using IconFonts;
 using ImGuiNET.Renderer;
+using MyEngine.Managers;
 using Num = System.Numerics;
 
 namespace MyEngine.Debug.IMGUIComponents;
@@ -52,7 +53,7 @@ public class ImGuiFilePicker : ImGuiComponent
 	
 	public Action<string> OnItemConfirmed;
 
-	public ImGuiFilePicker(ImGuiRenderer renderer, Scene scene, int id) : base(renderer, scene, id)
+	public ImGuiFilePicker(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id)
 	{
 		string startingPath = "";
 		startingPath = Environment.CurrentDirectory;
@@ -213,7 +214,7 @@ public class ImGuiFilePicker : ImGuiComponent
 							ImGui.TableNextRow();
 							ImGui.TableSetColumnIndex(0);
 							bool isSelected = SelectedFolder == di.Parent.FullName;
-							if (ImGui.Selectable("../", isSelected, ImGuiSelectableFlags.None))
+							if (ImGui.Selectable("../", isSelected, ImGuiSelectableFlags.SpanAllColumns))
 							{
 								SelectedFolder = di.Parent.FullName;
 								SelectedFile = "";
@@ -236,7 +237,7 @@ public class ImGuiFilePicker : ImGuiComponent
 							{
 								ImGui.PushStyleColor(ImGuiCol.Text, Color.Yellow.PackedValue);
 								bool isSelected = SelectedFolder == file.Path;
-								if (ImGui.Selectable(file.Name + "/", isSelected, ImGuiSelectableFlags.None))
+								if (ImGui.Selectable(file.Name + "/", isSelected, ImGuiSelectableFlags.SpanAllColumns))
 								{
 									SelectedFolder = file.Path;
 									SelectedFile = "";

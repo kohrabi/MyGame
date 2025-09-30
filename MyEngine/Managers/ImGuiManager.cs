@@ -7,6 +7,7 @@ using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Components;
 using MyEngine.Debug.IMGUIComponents;
+using MyEngine.Utils;
 
 namespace MyEngine.Managers;
 
@@ -20,6 +21,9 @@ public class ImGuiManager : GlobalManager
     
     public ImGuiRenderer ImGuiRenderer => _imGuiRenderer;
     public Scene Scene => SceneManager.Instance.CurrentScene;
+
+    public ImFontPtr IconFont;
+    public ImFontPtr BigIconFont;
     
     public ImGuiManager()
     {
@@ -35,6 +39,18 @@ public class ImGuiManager : GlobalManager
             _imGuiRenderer = new ImGuiRenderer(Core.Instance);
             _imGuiRenderer.RebuildFontAtlas();
         };
+        
+        _imGuiRenderer.AddFontFromFileTTF(
+            Helpers.GetContentPath(Core.Content, "Engine/ImGuiFonts/fontawesome-webfont.ttf"),
+            13.0f,
+            IconFonts.FontAwesome4.IconMin,
+            IconFonts.FontAwesome4.IconMax);
+        BigIconFont = _imGuiRenderer.AddFontFromFileTTF(
+            Helpers.GetContentPath(Core.Content, "Engine/ImGuiFonts/fontawesome-webfont.ttf"),
+            32.0f,
+            IconFonts.FontAwesome4.IconMin,
+            IconFonts.FontAwesome4.IconMax,
+            false);
     }
 
     public override void OnEnable() { }
@@ -78,7 +94,7 @@ public class ImGuiManager : GlobalManager
             Console.WriteLine("Component type " + typeof(T).FullName + " already exists in ImGuiManager. ");
             return returnComponent;
         }
-        var args = new object[] { _imGuiRenderer, Scene, ++_idCounter }
+        var args = new object[] { this, Scene, ++_idCounter }
             .Concat(varargs)
             .ToArray();
         T component = Activator.CreateInstance(typeof(T), args) as T;

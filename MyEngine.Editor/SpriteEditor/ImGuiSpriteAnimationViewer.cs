@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.ContentProcessors.Aseprite;
 using MyEngine.Debug.IMGUIComponents;
+using MyEngine.Managers;
 using Num = System.Numerics;
 
 namespace MyEngine.Editor.SpriteEditor;
@@ -26,7 +27,7 @@ public class ImGuiSpriteAnimationViewer : ImGuiComponent
 
     public int CurrentFrame => _frameIndex;
     
-    public ImGuiSpriteAnimationViewer(ImGuiRenderer renderer, Scene scene, int id) : base(renderer, scene, id)
+    public ImGuiSpriteAnimationViewer(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id)
     {
     }
 

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
 using MyEngine.Graphics;
+using MyEngine.Managers;
 using Num =  System.Numerics;
 
 namespace MyEngine.Debug.IMGUIComponents;
@@ -25,8 +26,8 @@ public class ImGuiViewportRender : ImGuiComponent
     
     public bool IsWindowFocused { get; private set; }
 
-    public ImGuiViewportRender(ImGuiRenderer imGuiRenderer, Scene scene, int id, Camera camera)
-        : base(imGuiRenderer, scene, id)
+    public ImGuiViewportRender(ImGuiManager manager, Scene scene, int id, Camera camera)
+        : base(manager, scene, id)
     {
         _camera = camera;
         CreateRenderTarget(DEFAULT_RENDER_TARGET_SIZE);

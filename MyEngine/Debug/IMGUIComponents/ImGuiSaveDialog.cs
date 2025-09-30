@@ -2,6 +2,7 @@
 using ImGuiNET;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
+using MyEngine.Managers;
 using Num = System.Numerics;
 
 namespace MyEngine.Debug.IMGUIComponents;
@@ -12,7 +13,7 @@ public class ImGuiSaveDialog : ImGuiComponent
     public Action PopupSaveFile;
     public Action PopupQuitFile;
     
-    public ImGuiSaveDialog(ImGuiRenderer renderer, Scene scene, int id) : base(renderer, scene, id) { }
+    public ImGuiSaveDialog(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id) { }
     public override void Update(GameTime gameTime) { }
 
     public void OnPopup(string fileName, Action saveFile, Action quitFile)

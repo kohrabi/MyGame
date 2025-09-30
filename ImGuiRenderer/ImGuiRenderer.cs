@@ -79,14 +79,14 @@ namespace ImGuiNET.Renderer
         /// <param name="glyphMin">Glyph Min</param>
         /// <param name="glyphMax">Glyph Max</param>
         /// <returns></returns>
-        public ImFontPtr AddFontFromFileTTF(string path, float fontSize, ushort glyphMin, ushort glyphMax)
+        public ImFontPtr AddFontFromFileTTF(string path, float fontSize, ushort glyphMin, ushort glyphMax, bool merge = true)
         {
             ImFontPtr fontPtr;
             var io = ImGui.GetIO();
             unsafe
             {
                 ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig();
-                config.MergeMode = true;
+                config.MergeMode = merge;
                 config.PixelSnapH = true;
             
                 // Yes this was chatgpted i'm stupid

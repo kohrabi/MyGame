@@ -54,6 +54,7 @@ public class SpriteEditor : Scene
     private GridComponent gridComponent;
     private Num.Vector2 gridCount = Num.Vector2.One;
     private List<string> recentOpeneds = new List<string>();
+    private ImFontPtr bigIconFont;
     
     public SpriteEditor()
     {
@@ -70,11 +71,6 @@ public class SpriteEditor : Scene
         cameraController.UseDragControl = true;
         
         // ImGui Setup
-        imGuiManager.ImGuiRenderer.AddFontFromFileTTF(
-            Helpers.GetContentPath(Content, "Engine/ImGuiFonts/fontawesome-webfont.ttf"),
-            13.0f,
-            IconFonts.FontAwesome4.IconMin,
-            IconFonts.FontAwesome4.IconMax);
         string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/SpriteEditor.ini");
         ImGui.LoadIniSettingsFromDisk(path);
         
@@ -82,6 +78,7 @@ public class SpriteEditor : Scene
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         ImGuiColor.CherryTheme();
+
         
         textureViewer = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
         textureViewer.ComponentExtension += OnGameViewComponentExtension;
@@ -92,6 +89,9 @@ public class SpriteEditor : Scene
         imguiSaveDialog = imGuiManager.AddComponent<ImGuiSaveDialog>();
         // imGuiManager.AddComponent<ImGuiConsole>();
         animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>();
+        var test = imGuiManager.AddComponent<ImGuiLogPopup>();
+        test.AddItem(new ImGuiLogPopupItem(ImGuiLogPopupType.Info, "Hello World!"));
+        test.AddItem(new ImGuiLogPopupItem(ImGuiLogPopupType.Warning, "Warning!"));
         
         BackgroundColor = new Color(15, 15, 15);
         SetResizableRectanglesActive(true);
@@ -261,9 +261,11 @@ public class SpriteEditor : Scene
         if (mode == EditorMode.Create)
             SetResizableRectanglesActive(false);
     }
-    
+
+    private bool test = false;
     private void ImGuiLayout()
     {
+        ImGui.ShowDemoWindow(ref test);
         if (ImGui.BeginMainMenuBar())
         {
             ImGui.PushStyleColor(ImGuiCol.ChildBg, new Num.Vector4(0.502f, 0.075f, 0.256f, 1.00f));
@@ -430,23 +432,7 @@ public class SpriteEditor : Scene
         ImGui.End();
         
         ImGuiFramesWindow();
-
-        if (!testPopup)
-        {
-            testPopup = true;
-        }
-        ImGui.OpenPopup("Hello");
-        
-        if (ImGui.Begin("Hello",
-                ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoResize |
-                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.Popup))
-        {
-            ImGui.TextWrapped("Helloooooo");
-        }
-        ImGui.End();
     }
-
-    private bool testPopup = false;
 
     private void ImGuiFramesWindow()
     {
