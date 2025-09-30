@@ -51,6 +51,8 @@ public class SpriteEditor : Scene
     private ResizeableRectangle? currentCreateRectangle;
     private ImGuiSaveDialog imguiSaveDialog;
     private ImGuiFilePicker imguiFilePicker;
+    private ImGuiLogPopup logPopup;
+    
     private GridComponent gridComponent;
     private Num.Vector2 gridCount = Num.Vector2.One;
     private List<string> recentOpeneds = new List<string>();
@@ -78,7 +80,6 @@ public class SpriteEditor : Scene
         io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
         io.ConfigDockingWithShift = true;
         ImGuiColor.CherryTheme();
-
         
         textureViewer = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
         textureViewer.ComponentExtension += OnGameViewComponentExtension;
@@ -89,9 +90,7 @@ public class SpriteEditor : Scene
         imguiSaveDialog = imGuiManager.AddComponent<ImGuiSaveDialog>();
         // imGuiManager.AddComponent<ImGuiConsole>();
         animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>();
-        var test = imGuiManager.AddComponent<ImGuiLogPopup>();
-        test.AddItem(new ImGuiLogPopupItem(ImGuiLogPopupType.Info, "Hello World!"));
-        test.AddItem(new ImGuiLogPopupItem(ImGuiLogPopupType.Warning, "Warning!"));
+        logPopup = imGuiManager.AddComponent<ImGuiLogPopup>();
         
         BackgroundColor = new Color(15, 15, 15);
         SetResizableRectanglesActive(true);
@@ -111,6 +110,7 @@ public class SpriteEditor : Scene
         Core.Instance.Exiting -= OnInstanceOnExiting;
     }
 
+    private float saved = 0.0f;
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
@@ -121,6 +121,18 @@ public class SpriteEditor : Scene
             rect.IsChosen = false;
             if (animationViewer.CurrentFrame == i)
                 rect.IsChosen = true;
+        }
+        
+        var keyboardState = Keyboard.GetState();
+        if (saved > 0.0f)
+            saved -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        else
+        {
+            if (asepriteJson != null && keyboardState.IsKeyDown(Keys.LeftControl) && keyboardState.IsKeyDown(Keys.S))
+            {
+                saved = 0.5f;
+                logPopup.Show(new ImGuiLogPopupItem(ImGuiLogPopupType.Info, $"Saved file {asepriteJson.FilePath} successfully"));
+            }
         }
         
         var mouse = Mouse.GetState();

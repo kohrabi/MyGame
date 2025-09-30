@@ -24,6 +24,7 @@ public class ImGuiLogPopupItem
     public float TimeLeft = 0.0f;
     public float Time = 0.0f;
     public int CurrentIndex = 0;
+    public Num.Vector2 PrevPosition = Num.Vector2.Zero;
 
     public ImGuiLogPopupItem(ImGuiLogPopupType type, string message)
     {
@@ -36,17 +37,25 @@ public class ImGuiLogPopup : ImGuiObject
 {
     private List<ImGuiLogPopupItem> _items = new List<ImGuiLogPopupItem>();
     private Queue<int> _indexQueue = new Queue<int>();
+    private int indexSize = 5;
     
     public ImGuiLogPopup(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < indexSize; i++)
            _indexQueue.Enqueue(i);
     }
 
-    public void AddItem(ImGuiLogPopupItem item)
+    public void Show(ImGuiLogPopupItem item)
     {
         item.Time = 5.0f;
         item.TimeLeft = item.Time; // Time until discard
+        if (_indexQueue.Count <= 0)
+        {
+            for (int i = indexSize; i < indexSize + 5; i++)
+                _indexQueue.Enqueue(i);
+            indexSize += 5;
+        }
+        Console.WriteLine(indexSize);
         item.CurrentIndex = _indexQueue.Dequeue();
         _items.Add(item);
     }
@@ -66,17 +75,25 @@ public class ImGuiLogPopup : ImGuiObject
     {
 
         float nextYPosition = 0;
+        int i = 0;
         foreach (var item in _items)
         {
             Num.Vector2 windowSize = new Num.Vector2(350, 0); // width, height (height=0 for auto)
             Num.Vector2 displaySize = ImGui.GetIO().DisplaySize;
             Num.Vector2 pos = new Num.Vector2(displaySize.X - windowSize.X - 20, 10); // 20px from right, 60px from bottom
             if (nextYPosition > 0)
-                pos.Y += nextYPosition + 0.0f;
+                pos.Y += nextYPosition;
+            
+            if (item.PrevPosition == Num.Vector2.Zero)
+                _items[i].PrevPosition = pos;
+            
             const float LeaveTime = 0.5f;
             if (item.TimeLeft <= LeaveTime)
                 pos.X += MathHelper.Lerp(0f, windowSize.X + 20, Easings.EaseOutExpo(1.0f - item.TimeLeft / LeaveTime));
+            else
+                pos = Num.Vector2.Lerp(item.PrevPosition, pos, 0.3f);
             
+            _items[i].PrevPosition = pos;
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
             ImGui.SetNextWindowSize(windowSize);
             // ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 2.0f * item.TimeLeft / Math.Max(item.Time, 1f));
@@ -120,6 +137,7 @@ public class ImGuiLogPopup : ImGuiObject
                 nextYPosition = pos.Y + ImGui.GetWindowSize().Y;
             }
             ImGui.End();
+            i++;
             // ImGui.PopStyleVar();
         }
     }
