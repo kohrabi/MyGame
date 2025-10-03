@@ -25,7 +25,7 @@ public abstract class Scene : IDisposable
 
     public Color BackgroundColor = Color.CornflowerBlue;
     
-    protected ContentManager Content =>  _content;
+    public ContentManager Content =>  _content;
    
     public List<GameObject> GameObjects => gameObjects;
     // Core stuff
@@ -54,7 +54,9 @@ public abstract class Scene : IDisposable
         LoadContent();
     }
 
-    protected abstract void LoadContent();
+    protected virtual void LoadContent()
+    {
+    }
 
     public virtual void UnloadContent()
     {

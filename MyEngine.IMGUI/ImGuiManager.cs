@@ -6,6 +6,7 @@ using ImGuiNET;
 using ImGuiNET.Renderer;
 using Microsoft.Xna.Framework;
 using MyEngine.Components;
+using MyEngine.Editor;
 using MyEngine.IMGUI.Components;
 using MyEngine.Utils;
 
@@ -39,6 +40,13 @@ public class ImGuiManager : GlobalManager
             _imGuiRenderer = new ImGuiRenderer(Core.Instance);
             _imGuiRenderer.RebuildFontAtlas();
         };
+        
+        
+        
+        var io = ImGui.GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+        io.ConfigDockingWithShift = true;
+        ImGuiColor.CherryTheme();
         
         _imGuiRenderer.AddFontFromFileTTF(
             Helpers.GetContentPath(Core.Content, "Engine/ImGuiFonts/fontawesome-webfont.ttf"),

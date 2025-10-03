@@ -6,39 +6,20 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
+using MyEngine.Graphics;
 
 namespace MyEngine.ContentProcessors.Aseprite;
 
-
 public class AsepriteJson
 {
-    public string FilePath;
-    public Texture2D Texture;
-    public string TextureFilePath { get; set; }
-    public Vector2 FrameSize { get; set; }
-    public Dictionary<string, List<AnimationFrame> > Animations { get; set; } = new();
-
-    // Make sure TextureFilePath already exists
-    public void LoadTexture()
-    {
-        if (Path.GetExtension(TextureFilePath) == ".png")
-            Texture = Texture2D.FromFile(Core.GraphicsDevice, TextureFilePath);
-        else
-        {
-            string xnb = Path.GetRelativePath(Path.GetFullPath(Core.Content.RootDirectory), TextureFilePath);
-            xnb = Path.Combine(Path.GetDirectoryName(xnb), Path.GetFileNameWithoutExtension(xnb));
-            Texture = Core.Content.Load<Texture2D>(xnb);
-        }
-    }
-    
-    public static AsepriteJson FromFileRelative(ContentManager content, string path)
+    public static SpriteAnimation FromFileRelative(ContentManager content, string path)
     {
         string filePath = Path.Combine(content.RootDirectory + "/" + path);
         return FromFile(content, Path.GetFullPath(filePath));
     }
     
     // Currently no rotated, trimmed
-    public static AsepriteJson FromFile(ContentManager content, string path)
+    public static SpriteAnimation FromFile(ContentManager content, string path)
     {
         string jsonText = File.ReadAllText(path);
         AsepriteRawJsonData? jsonData = JsonSerializer.Deserialize<AsepriteRawJsonData>(jsonText);
@@ -48,7 +29,7 @@ public class AsepriteJson
         if (jsonData.frames.Count == 0)
             throw new ArgumentOutOfRangeException("Yoo there can't be zero frames");
 
-        AsepriteJson asepriteJson = new AsepriteJson();
+        SpriteAnimation spriteAnimation = new SpriteAnimation();
         string imageLoadPath = Path.GetRelativePath(content.RootDirectory, Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(jsonData.meta.image));
         string imagePathXnb = Path.GetFullPath(Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(jsonData.meta.image) + ".xnb");
         string imagePathJson = Path.GetFullPath(Path.GetDirectoryName(path) + "/" + jsonData.meta.image);
@@ -56,16 +37,16 @@ public class AsepriteJson
         {
             if (!File.Exists(imagePathJson))
                 throw new ArgumentException("Cannot load because image file " + imagePathXnb + " doesn't exists in original format nor .xnb");
-            asepriteJson.Texture = Texture2D.FromFile(Core.GraphicsDevice, imagePathJson);
-            asepriteJson.TextureFilePath = Path.GetFullPath(imagePathJson);
+            spriteAnimation.Texture = Texture2D.FromFile(Core.GraphicsDevice, imagePathJson);
+            spriteAnimation.TextureFilePath = Path.GetFullPath(imagePathJson);
         }
         else
         {
-            asepriteJson.Texture = content.Load<Texture2D>(imageLoadPath);
-            asepriteJson.TextureFilePath = Path.GetFullPath(imagePathXnb);
+            spriteAnimation.Texture = content.Load<Texture2D>(imageLoadPath);
+            spriteAnimation.TextureFilePath = Path.GetFullPath(imagePathXnb);
         }
-        asepriteJson.FrameSize = new Vector2(jsonData.frames[0].sourceSize.w,  jsonData.frames[0].sourceSize.h);
-        asepriteJson.FilePath = path;
+        spriteAnimation.FrameSize = new Vector2(jsonData.frames[0].sourceSize.w,  jsonData.frames[0].sourceSize.h);
+        spriteAnimation.FilePath = path;
         
         int endFrame = 0;
         string parentTagName = "";
@@ -81,10 +62,10 @@ public class AsepriteJson
             else
             {
                 name = parentTagName + frameTag.name;
-                asepriteJson.Animations[parentTagName]
+                spriteAnimation.Animations[parentTagName]
                     .RemoveAll((match) => match.FrameNumber >= frameTag.from && match.FrameNumber <= frameTag.to);
-                if (asepriteJson.Animations[parentTagName].Count == 0)
-                    asepriteJson.Animations.Remove(parentTagName);
+                if (spriteAnimation.Animations[parentTagName].Count == 0)
+                    spriteAnimation.Animations.Remove(parentTagName);
             }
             for (int i = frameTag.from; i <= frameTag.to; i++)
             {
@@ -100,10 +81,10 @@ public class AsepriteJson
                     dataFrame.frame.h);
                 frames.Add(frame);
             }
-            asepriteJson.Animations.Add(name, frames);
+            spriteAnimation.Animations.Add(name, frames);
         }
         
-        return asepriteJson;
+        return spriteAnimation;
     }
     
     private class AsepriteRawJsonData

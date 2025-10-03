@@ -4,7 +4,7 @@ using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MyEngine.Components;
-using MyEngine.ContentProcessors.Aseprite;
+using MyEngine.Graphics;
 using MyEngine.IMGUI.Components;
 using MyEngine.Managers;
 using Num = System.Numerics;
@@ -31,13 +31,13 @@ public class ImGuiSpriteAnimationViewer : ImGuiObject
     }
 
     
-    public void SetAnimation(AsepriteJson asepriteJson, string defaultAnimation)
+    public void SetAnimation(SpriteAnimation spriteAnimation, string defaultAnimation)
     {
         if (_texture != 0)
             ImGuiRenderer.UnbindTexture(_texture);
-        _texture = ImGuiRenderer.BindTexture(asepriteJson.Texture);
-        _imageSize = new Num.Vector2(asepriteJson.Texture.Width, asepriteJson.Texture.Height);
-        _animations = asepriteJson.Animations;
+        _texture = ImGuiRenderer.BindTexture(spriteAnimation.Texture);
+        _imageSize = new Num.Vector2(spriteAnimation.Texture.Width, spriteAnimation.Texture.Height);
+        _animations = spriteAnimation.Animations;
         _currentAnimation = defaultAnimation;
     }
 

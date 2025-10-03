@@ -131,7 +131,7 @@ public class EditorScene1 : Scene
     {
         if (ImGui.BeginMainMenuBar())
         {
-            if (ImGui.BeginMenu("Hello"))
+            if (ImGui.BeginMenu("File"))
             {
                 ImGui.EndMenu();
             }

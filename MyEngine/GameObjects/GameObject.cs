@@ -15,13 +15,11 @@ public sealed class GameObject
 {
     private bool _active = true;
     private bool _activeSelf = true;
-    private bool _isInitialized = false;
+    private List<Component> _unitializedComponents = new List<Component>();
     private List<Component> _components = new List<Component>();
     private Scene _scene;
 
     public bool IsDebugGameObject = false;
-    
-    public bool IsInitialized => _isInitialized;
     public string Name { get; set; }
     public Transform Transform { get; set; }
     public Scene Scene => _scene;
@@ -77,7 +75,7 @@ public sealed class GameObject
         T component = Activator.CreateInstance(typeof(T), varargs) as T;
         component.GameObject = this;
         component.Transform = Transform;
-        _components.Add(component);
+        _unitializedComponents.Add(component);
         return component;
     }
     
@@ -94,16 +92,20 @@ public sealed class GameObject
     public bool TryGetComponent<T>(out T component) where T : Component
     {
         component = (T)_components.Find(c => c is T);
+        if (component == null)
+            component = (T)_unitializedComponents.Find(c => c is T);
         return component != null;
     }
 
     public void Initialize(ContentManager content)
     {
-        _isInitialized = true;
-        foreach (var component in _components)
+        foreach (var component in _unitializedComponents)
         {
-            component.Initialize(content);
+            component.Initialize(Scene.Content);
+            _components.Add(component);
         }
+        _unitializedComponents.Clear();
+        
     }
 
     public void Destroy()
@@ -119,6 +121,15 @@ public sealed class GameObject
     public void UpdateComponents(GameTime gameTime)
     {
         if (!Active) return;
+
+        // In case it isn't initialized
+        foreach (var component in _unitializedComponents)
+        {
+            component.Initialize(Scene.Content);
+            _components.Add(component);
+        }
+        _unitializedComponents.Clear();
+        
         foreach (var component in _components)
         {
             if (component.Active)

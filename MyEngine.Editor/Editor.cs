@@ -23,6 +23,6 @@ public class Editor : MyEngine.Core
     {
         base.Initialize();
         
-        SceneManager.Instance.LoadScene(new SpriteEditor.SpriteEditor());
+        SceneManager.Instance.LoadScene(new EditorScene1());
     }
 }

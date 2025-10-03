@@ -14,6 +14,7 @@ using MyEngine.Components;
 using MyEngine.ContentProcessors.Aseprite;
 using MyEngine.IMGUI.Components;
 using MyEngine.GameObjects;
+using MyEngine.Graphics;
 using MyEngine.Managers;
 using MyEngine.Utils;
 using MyEngine.Utils.MyMath;
@@ -33,35 +34,48 @@ public class SpriteEditor : Scene
     
     EditorMode mode = EditorMode.Edit;
 
-    private ImGuiManager imGuiManager;
+    #region GameView Properties
+
     private CameraController cameraController;
-
+    
     private GameObject sprite = null;
-    private AsepriteJson? asepriteJson = null;
-    private int selectedAnimation = 0;
-    private string[] animations = [""];
-    private ImGuiSpriteAnimationViewer animationViewer;
+    private GridComponent gridComponent;
     private List<ResizeableRectangle> framesRectangle = new List<ResizeableRectangle>();
-    private nint texturePointer = IntPtr.Zero;
-    string currentAnimation = "";
-    private ImGuiViewportRender textureViewer;
 
-    private float createModeDelayTimer = 0.0f;
-    private bool isCreating = false;
+    #endregion
+    
+    #region ImGui Properties
+    
+    private ImGuiManager imGuiManager;
+    private ImGuiSpriteAnimationViewer animationViewer;
+    private nint texturePointer = IntPtr.Zero;
+    private ImGuiViewportRender textureViewer;
+    
     private ResizeableRectangle? currentCreateRectangle;
     private ImGuiSaveDialog imguiSaveDialog;
     private ImGuiFilePicker imguiFilePicker;
     private ImGuiLogPopup logPopup;
-    
-    private GridComponent gridComponent;
-    private Num.Vector2 gridCount = Num.Vector2.One;
-    private List<string> recentOpeneds = new List<string>();
     private ImFontPtr bigIconFont;
+    
+    private List<string> recentOpeneds = new List<string>();
+    #endregion
+    
+    private SpriteAnimation? spriteAnimation = null;
+
+    private int selectedAnimation = 0;
+    private string[] animations = [""];
+    
+    string currentAnimation = "";
+
+    private float createModeDelayTimer = 0.0f;
+    private bool isCreating = false;
+    
+    private Num.Vector2 gridCount = Num.Vector2.One;
     
     public SpriteEditor()
     {
-        Core.Instance.Exiting += OnInstanceOnExiting;
         imGuiManager = (Core.RegisterOrGetManager(new ImGuiManager()) as ImGuiManager)!;
+        BackgroundColor = new Color(15, 15, 15);
     }
 
 
@@ -76,23 +90,16 @@ public class SpriteEditor : Scene
         string path = Path.GetFullPath(Content.RootDirectory + "/ImGuiIni/SpriteEditor.ini");
         ImGui.LoadIniSettingsFromDisk(path);
         
-        var io = ImGui.GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-        io.ConfigDockingWithShift = true;
-        ImGuiColor.CherryTheme();
-        
         textureViewer = imGuiManager.AddComponent<ImGuiViewportRender>(MainCamera);
         textureViewer.ComponentExtension += OnGameViewComponentExtension;
         
         imguiFilePicker = imGuiManager.AddComponent<ImGuiFilePicker>();
-        imguiFilePicker.OnItemConfirmed += file => Console.WriteLine(file);
         imGuiManager.AddDrawCommand(ImGuiLayout);
         imguiSaveDialog = imGuiManager.AddComponent<ImGuiSaveDialog>();
         // imGuiManager.AddComponent<ImGuiConsole>();
         animationViewer = imGuiManager.AddComponent<ImGuiSpriteAnimationViewer>();
         logPopup = imGuiManager.AddComponent<ImGuiLogPopup>();
         
-        BackgroundColor = new Color(15, 15, 15);
         SetResizableRectanglesActive(true);
         // Before Load Content
         base.Initialize();
@@ -101,13 +108,6 @@ public class SpriteEditor : Scene
     
     protected override void LoadContent()
     {
-    }
-
-    public override void UnloadContent()
-    {
-        base.UnloadContent();
-        
-        Core.Instance.Exiting -= OnInstanceOnExiting;
     }
 
     private float saved = 0.0f;
@@ -123,26 +123,14 @@ public class SpriteEditor : Scene
                 rect.IsChosen = true;
         }
         
-        var keyboardState = Keyboard.GetState();
-        if (saved > 0.0f)
-            saved -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-        else
-        {
-            if (asepriteJson != null && keyboardState.IsKeyDown(Keys.LeftControl) && keyboardState.IsKeyDown(Keys.S))
-            {
-                saved = 0.5f;
-                logPopup.Show(new ImGuiLogPopupItem(ImGuiLogPopupType.Info, $"Saved file {asepriteJson.FilePath} successfully"));
-            }
-        }
+        HotKeyHandles(gameTime);
         
-        var mouse = Mouse.GetState();
-        int scrollValue = mouse.ScrollWheelValue;
         cameraController.Active = false;
-        if (textureViewer.IsWindowFocused && asepriteJson != null)
+        if (textureViewer.IsWindowFocused && spriteAnimation != null)
         {
             cameraController.Active = true;
-            cameraController.ClampBound = asepriteJson.Texture.Bounds;
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            cameraController.ClampBound = spriteAnimation.Texture.Bounds;
+            if (InputManager.IsKeyDown(Keys.Space))
                 MainCamera.CenterPosition(sprite.Transform.GlobalPosition);
             
             if (createModeDelayTimer > 0)
@@ -151,29 +139,29 @@ public class SpriteEditor : Scene
             {
                 if (mode == EditorMode.Create && currentAnimation != "")
                 {
-                    if (mouse.LeftButton == ButtonState.Pressed && !isCreating)
+                    if (InputManager.IsMouseDown(0) && !isCreating)
                     {
                         isCreating = true;
-                        currentCreateRectangle.Initialize(MainCamera.ScreenToWorld(mouse.Position), Vector2.Zero);
+                        currentCreateRectangle.Initialize(MainCamera.ScreenToWorld(InputManager.GetMousePosition()), Vector2.Zero);
                         currentCreateRectangle.SetResizeIndex(4);
                         currentCreateRectangle.GameObject.Active = true;
                     }
-                    else if (mouse.LeftButton == ButtonState.Released && isCreating)
+                    else if (InputManager.IsMouseUp(0) && isCreating)
                     {
                         isCreating = false;
                         currentCreateRectangle.GameObject.Active = false;
                         AnimationFrame frame = new AnimationFrame();
                         frame.Duration = 100.0f;
                         frame.Rectangle = currentCreateRectangle.Rectangle.ToRectangle();
-                        asepriteJson.Animations[currentAnimation].Add(frame);
-                        int index = asepriteJson.Animations[currentAnimation].Count - 1;
+                        spriteAnimation.Animations[currentAnimation].Add(frame);
+                        int index = spriteAnimation.Animations[currentAnimation].Count - 1;
                         PrefabBuilder.Instatiate()
                             .AddComponent<ResizeableRectangle>(c =>
                             {
                                 c.Initialize(frame.Rectangle.Location.ToVector2(), frame.Rectangle.Size.ToVector2());
                                 c.OnResized += f =>
                                 {
-                                    asepriteJson.Animations[currentAnimation][index].Rectangle = f;
+                                    spriteAnimation.Animations[currentAnimation][index].Rectangle = f;
                                 };
                                 framesRectangle.Add(c);
                             });
@@ -184,6 +172,20 @@ public class SpriteEditor : Scene
         }
         
     }
+
+    private void HotKeyHandles(GameTime gameTime)
+    {
+        if (saved > 0.0f)
+            saved -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        else
+        {
+            if (spriteAnimation != null && InputManager.IsCombinationPressed(Keys.LeftControl, Keys.S))
+            {
+                saved = 0.5f;
+                SaveFile(spriteAnimation.FilePath);
+            }
+        }
+    }
     
     private void SetResizableRectanglesActive(bool active)
     {
@@ -193,25 +195,21 @@ public class SpriteEditor : Scene
         }
     }
     
-    private void OnInstanceOnExiting(object? sender, ExitingEventArgs args)
-    {
-    }
-    
     private void InitializeAnimations()
     {
-        animations = asepriteJson.Animations.ToList().Select((pair => pair.Key)).ToArray();
+        animations = spriteAnimation.Animations.ToList().Select((pair => pair.Key)).ToArray();
         
         RemoveGameObject(sprite);
         PrefabBuilder.Instatiate()
             .AddComponent<Sprite>((sprite) =>
             {
-                sprite.Texture = asepriteJson.Texture;
+                sprite.Texture = spriteAnimation.Texture;
                 sprite.Origin = Vector2.Zero;
             })
             .AddComponent<GridComponent>((g) =>
             {
                 gridComponent = g;
-                g.Initialize(asepriteJson.Texture.Bounds.Size.ToVector2(), asepriteJson.FrameSize, Color.Gray);
+                g.Initialize(spriteAnimation.Texture.Bounds.Size.ToVector2(), spriteAnimation.FrameSize, Color.Gray);
             })
             .GetGameObject(o =>
             {
@@ -228,23 +226,47 @@ public class SpriteEditor : Scene
             });
 
         imGuiManager.ImGuiRenderer.UnbindTexture(texturePointer);
-        texturePointer = imGuiManager.ImGuiRenderer.BindTexture(asepriteJson.Texture);
+        texturePointer = imGuiManager.ImGuiRenderer.BindTexture(spriteAnimation.Texture);
         
         gridComponent.GridSize = Vector2.Max(gridComponent.GridSize, Num.Vector2.One);
         gridCount = (gridComponent.Size / gridComponent.GridSize).ToNumerics();
         
-        animationViewer.SetAnimation(asepriteJson, asepriteJson.Animations.Keys.First());
+        animationViewer.SetAnimation(spriteAnimation, spriteAnimation.Animations.Keys.First());
     }
     
-    private void LoadAsepriteJson(string path)
+    private void LoadAsepriteJson(string file)
     {
-        asepriteJson = AsepriteJson.FromFile(Content, path);
+        spriteAnimation = AsepriteJson.FromFile(Content, file);
         InitializeAnimations();
+        
+        logPopup.Show(new ImGuiLogPopupItem(ImGuiLogPopupType.None, $"Imported {file} loaded successfully"));
+    }
+
+    private void LoadMafFile(string file)
+    {
+        SpriteAnimation temp = JsonSerializer.Deserialize<SpriteAnimation>(File.ReadAllText(file), SerializeSettings.Default)!;
+        temp.LoadTexture();
+        spriteAnimation = temp;
+        InitializeAnimations();
+        logPopup.Show(new ImGuiLogPopupItem(ImGuiLogPopupType.None, $"Opened {file} loaded successfully"));
+    }
+    
+    private void SaveFile(string file)
+    {
+        if (Path.GetExtension(file) != ".maf")
+            file = Path.GetFileNameWithoutExtension(file) + ".maf";
+        string jsonString = JsonSerializer.Serialize(spriteAnimation, SerializeSettings.Default);
+        string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileName(file));
+        File.WriteAllText(tempFile, jsonString);
+        File.Copy(tempFile, file, true);
+        File.Delete(tempFile);
+        
+        logPopup.Show(new ImGuiLogPopupItem(ImGuiLogPopupType.Info, $"Saved {file} successfully"));
     }
 
     private void ChooseAnimation(string name)
     {
-        if (asepriteJson == null)
+        if (spriteAnimation == null)
             return;
         
         animationViewer.PlayAnimation(name);
@@ -254,7 +276,7 @@ public class SpriteEditor : Scene
         }
         framesRectangle.Clear();
         currentAnimation = name;
-        var frames = asepriteJson.Animations[name];
+        var frames = spriteAnimation.Animations[name];
         for (int i = 0; i < frames.Count; i++)
         {
             var frame = frames[i];
@@ -265,7 +287,7 @@ public class SpriteEditor : Scene
                     int i1 = i;
                     c.OnResized += f =>
                     {
-                        asepriteJson.Animations[name][i1].Rectangle = f;
+                        spriteAnimation.Animations[name][i1].Rectangle = f;
                     };
                     framesRectangle.Add(c);
                 });
@@ -300,13 +322,7 @@ public class SpriteEditor : Scene
                     imguiFilePicker.OnlyAllowFolders = false;
                     imguiFilePicker.AllowUncreatedFile = false;
                     imguiFilePicker.AllowedExtensions = [".maf"];
-                    imguiFilePicker.OnItemConfirmed = file =>
-                    {
-                        AsepriteJson temp = JsonSerializer.Deserialize<AsepriteJson>(File.ReadAllText(file), SerializeSettings.Default)!;
-                        temp.LoadTexture();
-                        asepriteJson = temp;
-                        InitializeAnimations();
-                    };
+                    imguiFilePicker.OnItemConfirmed = LoadMafFile;
                     imguiFilePicker.OpenPopup("Open File");   
                 }
                 ImGui.Separator();
@@ -317,16 +333,7 @@ public class SpriteEditor : Scene
                     {
                         ImGui.MenuItem("None");
                     }
-                    else
-                    {
-                        foreach (var recentOpen in recentOpeneds)
-                        {
-                            if (ImGui.MenuItem(Path.GetFileName(recentOpen)))
-                            {
-                                
-                            }
-                        }
-                    }
+                    
                     ImGui.EndMenu();
                 }
 
@@ -337,17 +344,7 @@ public class SpriteEditor : Scene
                     imguiFilePicker.ConfirmButtonName = "Save";
                     imguiFilePicker.OnlyAllowFolders = false;
                     imguiFilePicker.AllowedExtensions = [".maf"];
-                    imguiFilePicker.OnItemConfirmed = file =>
-                    {
-                        string jsonString = JsonSerializer.Serialize(asepriteJson, SerializeSettings.Default);
-                        {
-                            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileName(file));
-                            File.WriteAllText(tempFile, jsonString);
-                            File.Copy(tempFile, file, true);
-                            File.Delete(tempFile);
-                        }
-                        // Console.WriteLine(jsonString);
-                    };
+                    imguiFilePicker.OnItemConfirmed = SaveFile;
                     imguiFilePicker.OpenPopup("Save File");   
                 }
                 ImGui.Separator();
@@ -358,10 +355,7 @@ public class SpriteEditor : Scene
                         imguiFilePicker.ConfirmButtonName = "Import";
                         imguiFilePicker.OnlyAllowFolders = false;
                         imguiFilePicker.AllowedExtensions = [".json"];
-                        imguiFilePicker.OnItemConfirmed = file =>
-                        {
-                            LoadAsepriteJson(file);
-                        };
+                        imguiFilePicker.OnItemConfirmed = LoadAsepriteJson;
                         imguiFilePicker.OpenPopup("Import File");   
                     }
                     ImGui.EndMenu();
@@ -392,7 +386,7 @@ public class SpriteEditor : Scene
             ImGui.Separator();
             
             ImGui.NewLine();
-            ImGui.Text("Current File: " + asepriteJson?.FilePath); 
+            ImGui.Text("Current File: " + spriteAnimation?.FilePath); 
             ImGui.NewLine();
             ImGui.Separator();
             ImGui.NewLine();
@@ -403,7 +397,7 @@ public class SpriteEditor : Scene
             ImGui.NewLine();
             ImGui.Separator();
             ImGui.NewLine();
-            ImGui.Text("Current Texture File: " + asepriteJson?.TextureFilePath);
+            ImGui.Text("Current Texture File: " + spriteAnimation?.TextureFilePath);
             if (ImGui.Button("Change File##Texture"))
             {
                 imguiFilePicker.ConfirmButtonName = "Open";
@@ -411,10 +405,10 @@ public class SpriteEditor : Scene
                 imguiFilePicker.AllowedExtensions = [".xnb", ".png"];
                 imguiFilePicker.OnItemConfirmed = file =>
                 {
-                    if (asepriteJson != null)
+                    if (spriteAnimation != null)
                     {
-                        asepriteJson.TextureFilePath = file;
-                        asepriteJson.LoadTexture();
+                        spriteAnimation.TextureFilePath = file;
+                        spriteAnimation.LoadTexture();
                     }
                 };
                 imguiFilePicker.OpenPopup("Open File");
@@ -422,22 +416,22 @@ public class SpriteEditor : Scene
             ImGui.NewLine();
             ImGui.Separator();
             ImGui.NewLine();
-            Num.Vector2 frameSize = asepriteJson?.FrameSize.ToNumerics() ?? Num.Vector2.One;
+            Num.Vector2 frameSize = spriteAnimation?.FrameSize.ToNumerics() ?? Num.Vector2.One;
             if (ImGui.DragFloat2("Frame Size", ref frameSize, 1.0f, 1.0f, 500f))
             {
-                if (asepriteJson != null)
+                if (spriteAnimation != null)
                 {
                     gridComponent.GridSize = Vector2.Max(frameSize, Num.Vector2.One);
                     gridCount = (gridComponent.Size / gridComponent.GridSize).ToNumerics();
-                    asepriteJson.FrameSize = gridComponent.GridSize;
+                    spriteAnimation.FrameSize = gridComponent.GridSize;
                 }
             }
             if (ImGui.DragFloat2("Grid Count", ref gridCount, 1.0f, 1.0f, 500f))
             {
-                if (asepriteJson != null)
+                if (spriteAnimation != null)
                 {
                     gridComponent.GridSize = gridComponent.Size / gridCount;
-                    asepriteJson.FrameSize = gridComponent.GridSize;
+                    spriteAnimation.FrameSize = gridComponent.GridSize;
                 }
             }
         }
@@ -448,11 +442,10 @@ public class SpriteEditor : Scene
 
     private void ImGuiFramesWindow()
     {
-        
         if (ImGui.Begin("Frames", ImGuiWindowFlags.HorizontalScrollbar))
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 12.0f); // corner radius in px
-            if (currentAnimation != "" && asepriteJson != null)
+            if (currentAnimation != "" && spriteAnimation != null)
             {
                 Num.Vector2 SelectableSize = new Num.Vector2(81, 42) * 2.0f;
                 
@@ -460,12 +453,12 @@ public class SpriteEditor : Scene
                 float spacing = ImGui.GetStyle().ItemSpacing.X;
                 float avail = ImGui.GetContentRegionAvail().X;
                 float x = 0;
-                foreach (var animationFrame in asepriteJson.Animations[currentAnimation])
+                foreach (var animationFrame in spriteAnimation.Animations[currentAnimation])
                 {
                     ImGui.PushID("AnimationFrame " + i);
                     Num.Vector2 pos = animationFrame.Rectangle.Location.ToVector2().ToNumerics();
                     Num.Vector2 size = animationFrame.Rectangle.Size.ToVector2().ToNumerics();
-                    Num.Vector2 dividor = new Num.Vector2(asepriteJson.Texture.Width, asepriteJson.Texture.Height);
+                    Num.Vector2 dividor = new Num.Vector2(spriteAnimation.Texture.Width, spriteAnimation.Texture.Height);
                     Num.Vector2 selectableSize = SelectableSize;
                     
                     Num.Vector2 prevCursorPos = ImGui.GetCursorPos();
@@ -486,7 +479,7 @@ public class SpriteEditor : Scene
                 
                 ImGui.NewLine();
                 x = 0;
-                foreach (var animationFrame in asepriteJson.Animations[currentAnimation])
+                foreach (var animationFrame in spriteAnimation.Animations[currentAnimation])
                 {
                     ImGui.PushID("AnimationFrame " + i);
                     Num.Vector2 size = animationFrame.Rectangle.Size.ToVector2().ToNumerics();
@@ -510,7 +503,7 @@ public class SpriteEditor : Scene
                 
                 ImGui.NewLine();
                 x = 0;
-                foreach (var animationFrame in asepriteJson.Animations[currentAnimation])
+                foreach (var animationFrame in spriteAnimation.Animations[currentAnimation])
                 {
                     ImGui.PushID("AnimationFrame " + i);
                     Num.Vector2 size = animationFrame.Rectangle.Size.ToVector2().ToNumerics();

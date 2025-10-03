@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
 using MyEngine.GameObjects;
+using MyEngine.Managers;
 using MyEngine.Utils.MyMath;
 
 namespace MyEngine.Components;
@@ -36,28 +37,26 @@ public class CameraController : Component
     {
         base.Update(gameTime);
 
-        var mouse = Mouse.GetState();
-        int scrollValue = mouse.ScrollWheelValue;
         // Zoom in
-        if (Math.Abs(scrollValue - prevScrollValue) > 0)
+        if (Math.Abs(InputManager.GetMouseScrollDelta()) > 0)
         {
-            camera.Zoom += -(scrollValue - prevScrollValue) / 1000.0f * camera.Zoom;
+            camera.Zoom += -(InputManager.GetMouseScrollDelta()) / 1000.0f * camera.Zoom;
         }
         
         if (UseDragControl)
         { 
             // Move Camera
-            if (mouse.RightButton == ButtonState.Pressed)
+            if (InputManager.IsMouseDown(1))
             {
                 if (!dragging)
                 {
-                    downMousePosition = mouse.Position;
+                    downMousePosition = InputManager.GetMousePosition();
                     dragging = true;
                     prevCameraPosition = camera.Transform.GlobalPosition;
                 }
                 else
                 {
-                    camera.Transform.GlobalPosition = prevCameraPosition - (mouse.Position - downMousePosition).ToVector2();
+                    camera.Transform.GlobalPosition = prevCameraPosition - (InputManager.GetMousePosition() - downMousePosition).ToVector2();
                 }
             }
             else
@@ -94,14 +93,14 @@ public class CameraController : Component
             Vector2 direction = Vector2.Zero;
             
             // What the fuck why is this shit flipped?
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            if (InputManager.IsKeyDown(Keys.W))
                 direction -= Vector2.UnitY;
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
+            if (InputManager.IsKeyDown(Keys.S))
                 direction += Vector2.UnitY;    
             
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            if (InputManager.IsKeyDown(Keys.A))
                 direction -= Vector2.UnitX;
-            if  (Keyboard.GetState().IsKeyDown(Keys.D))
+            if  (InputManager.IsKeyDown(Keys.D))
                 direction += Vector2.UnitX;
             
             if (direction != Vector2.Zero)
@@ -109,6 +108,5 @@ public class CameraController : Component
             
             Transform.Position += direction * SPEED * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
-        prevScrollValue = scrollValue;
     }
 }

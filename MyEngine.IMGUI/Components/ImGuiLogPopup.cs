@@ -23,40 +23,29 @@ public class ImGuiLogPopupItem
     public string Message = String.Empty;
     public float TimeLeft = 0.0f;
     public float Time = 0.0f;
-    public int CurrentIndex = 0;
     public Num.Vector2 PrevPosition = Num.Vector2.Zero;
+    public bool StopTimer = false;
 
-    public ImGuiLogPopupItem(ImGuiLogPopupType type, string message)
+    public ImGuiLogPopupItem(ImGuiLogPopupType type, string message, float time = 5.0f)
     {
         Type = type;
         Message = message;
+        Time = time;
+        TimeLeft = time;
     }
 }
 
 public class ImGuiLogPopup : ImGuiObject
 {
     private List<ImGuiLogPopupItem> _items = new List<ImGuiLogPopupItem>();
-    private Queue<int> _indexQueue = new Queue<int>();
     private int indexSize = 5;
     
     public ImGuiLogPopup(ImGuiManager manager, Scene scene, int id) : base(manager, scene, id)
     {
-        for (int i = 0; i < indexSize; i++)
-           _indexQueue.Enqueue(i);
     }
 
     public void Show(ImGuiLogPopupItem item)
     {
-        item.Time = 5.0f;
-        item.TimeLeft = item.Time; // Time until discard
-        if (_indexQueue.Count <= 0)
-        {
-            for (int i = indexSize; i < indexSize + 5; i++)
-                _indexQueue.Enqueue(i);
-            indexSize += 5;
-        }
-        Console.WriteLine(indexSize);
-        item.CurrentIndex = _indexQueue.Dequeue();
         _items.Add(item);
     }
     
@@ -64,9 +53,9 @@ public class ImGuiLogPopup : ImGuiObject
     {
         for (int i = 0; i < _items.Count; i++)
         {
+            if (_items[i].StopTimer)
+                continue;
             _items[i].TimeLeft -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (_items[i].TimeLeft <= 0)
-                _indexQueue.Enqueue(_items[i].CurrentIndex);
         }
         _items.RemoveAll((item) => item.TimeLeft <= 0);
     }
@@ -90,9 +79,9 @@ public class ImGuiLogPopup : ImGuiObject
                 _items[i].PrevPosition = pos;
             }
             
-            const float LeaveTime = 0.5f;
-            if (item.TimeLeft <= LeaveTime)
-                pos.X += MathHelper.Lerp(0f, windowSize.X + 20, Easings.EaseOutExpo(1.0f - item.TimeLeft / LeaveTime));
+            const float leaveTime = 0.5f;
+            if (item.TimeLeft <= leaveTime)
+                pos.X += MathHelper.Lerp(0f, windowSize.X + 20, Easings.EaseOutExpo(1.0f - item.TimeLeft / leaveTime));
             else
                 pos = Num.Vector2.Lerp(item.PrevPosition, pos, 0.3f);
             
@@ -100,9 +89,12 @@ public class ImGuiLogPopup : ImGuiObject
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
             ImGui.SetNextWindowSize(windowSize);
             // ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 2.0f * item.TimeLeft / Math.Max(item.Time, 1f));
-            if (ImGui.Begin("Error##" + item.CurrentIndex,
+            
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Num.Vector2(0, 0));
+            if (ImGui.Begin("Error##" + item.GetHashCode(),
                     ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing))
             {
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                 Color color = Color.Yellow;
                 string symbol = FontAwesome4.ExclamationCircle;
 
@@ -137,9 +129,15 @@ public class ImGuiLogPopup : ImGuiObject
                 ImGui.SameLine(0, 0);
                 ImGui.SetCursorPosX(prevPos.X + 42.0f);
                 ImGui.TextWrapped(item.Message);
+                
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() - 0f);
+                ImGui.ProgressBar((item.TimeLeft - leaveTime) / (item.Time - leaveTime), new Num.Vector2(windowSize.X, 2), "");
+                
                 nextYPosition = pos.Y + ImGui.GetWindowSize().Y;
+                _items[i].StopTimer = ImGui.IsWindowHovered();
             }
             ImGui.End();
+            ImGui.PopStyleVar();
             i++;
             // ImGui.PopStyleVar();
         }

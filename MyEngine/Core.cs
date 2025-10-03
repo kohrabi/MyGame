@@ -97,33 +97,11 @@ namespace MyEngine
             // Init Managers
             
             _sceneManager = new SceneManager();
+            RegisterManager(new InputManager());
             RegisterManager(_sceneManager);
             RegisterManager(new DebugLog());
             RegisterManager(new CoroutineManager());
             RegisterManager(new TweenManager());
-            // GetGlobalManager<CoroutineManager>().StartCoroutine(test());
-        }
-
-        IEnumerator test()
-        {
-            yield return null;
-            Console.WriteLine("Hello");
-            yield return null;
-            Console.WriteLine("returned null");
-            yield return new WaitForSeconds(1f);
-            Console.WriteLine("Waited 1 seconds");
-            yield return new WaitFor(other());
-            Console.WriteLine("Waited For other");
-            yield break;
-            Console.WriteLine("Hi");
-        }
-
-        IEnumerator other()
-        {
-            yield return null;
-            Console.WriteLine("Other Coroutine");
-            yield return new WaitForSeconds(1f);
-            Console.WriteLine("Other Coroutine Ended");
         }
 
         /// <summary>
